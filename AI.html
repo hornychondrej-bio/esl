@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>Writing stories</title>
+		<title>AI</title>
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
@@ -22,8 +22,26 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>
-				<h1> Writing stories</h1>
+				<section data-markdown>
+					<textarea data-template>
+					# AI
+					---
+					## Act 5: Replica
+					---
+					### The story of Replica
+					- Journalist Eugenia Kuyda worked on a chatbot
+					- Her friend Roman died in 2015, Eugenia put their chat messages into the chatbot
+					- The chatbot helped her remember the lost friend and eventually became _Replica_
+					- In 2017, _Replica_ was made available to the public
+					- By 2023, _Replica_ had over 30 million users and offered various relationship types
+					--
+					### Personality change
+					- In 2023, the company behind Replica added safety features into _Replica_
+					- Many people complained that their _Replicas_ lost their personality
+					--
+					### Ethical questions
+					- 
+					</textarea>
 				</section>
 				<section>
 				<h2>How to write a good story?</h2>
@@ -249,6 +267,10 @@
 			// - https://revealjs.com/initialization/
 			// - https://revealjs.com/config/
 			Reveal.initialize({
+				markdown: {
+        		    // Set the regular expression for VERTICAL slides (--)
+		            verticalSeparator: '--'
+       				},
 				quiz: {
         				timerDuration: 30,
         				useTimer: false,
