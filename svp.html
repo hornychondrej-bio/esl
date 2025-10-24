@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktivní Kurikulum | Anglický Jazyk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5DC;
+            color: #5D4037;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #D2B48C;
+        }
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #A0522D;
+            border: 2px solid transparent;
+        }
+        .tab-button:hover {
+            background-color: #FFF8E1;
+        }
+        .tab-button.active {
+            color: #8B4513;
+            border-color: #A0522D;
+            background-color: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: rgba(245, 245, 220, 0.8);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #D2B48C;
+        }
+        .competency-card {
+            background-color: #FFFFFF;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            border-left-width: 4px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        dt {
+            font-weight: 600;
+            color: #8B4513;
+        }
+        dd {
+            margin-left: 1rem;
+            margin-bottom: 0.75rem;
+            padding-left: 1rem;
+            border-left: 2px solid #D2B48C;
+            color: #5D4037;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- 
+    Chosen Palette: Neutral & Warm (#F5F5DC, #D2B48C, #A0522D, #BC8F8F, #8B4513)
+    Application Structure Plan: Jednostránková aplikace (SPA) využívající horní sticky navigaci pro přechod mezi sekcemi. Hlavní obsah je rozdělen na úvod (specifika gymnázia), interaktivní sekci ročníků (přepínání pomocí záložek Prima-Kvarta, kde každá záložka zobrazuje graf a textové detaily) a závěrečnou sekci klíčových kompetencí (zobrazenou jako mřížka karet). Tento design byl zvolen pro maximální přehlednost a interaktivitu, aby uživatel (učitel, rodič, student) mohl snadno porovnávat ročníky a rychle nalézt detaily, aniž by byl zahlcen veškerým textem najednou.
+    Visualization & Content Choices: 
+    - Hodinová dotace (96h): Inform; Velké číslo (HTML); Rychlý přehled.
+    - Rozložení hodin v ročníku (Prima, Sekunda...): Compare/Organize; Koláčový graf (Doughnut Chart, Chart.js, Canvas); Ideální pro zobrazení složení celku (96 hodin) a vizuální porovnání váhy jednotlivých OVU.
+    - Detaily OVU (Metodika, Okruh): Inform/Organize; Textový seznam (HTML/CSS); Doplnění grafu o nezbytné kvalitativní detaily.
+    - Klíčové kompetence (8 KK): Organize/Inform; Mřížka karet (Grid, HTML/CSS/Tailwind); Rozdělení hustého textu do přehledných, vizuálně oddělených bloků.
+    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+
+    <header class="py-10 px-4 text-center" style="background-color: #F0EAD6;">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-3" style="color: #8B4513;">Kurikulární Plán: Anglický Jazyk</h1>
+        <p class="text-xl md:text-2xl font-light" style="color: #A0522D;">Interaktivní průvodce výukou na nižším gymnáziu (A2 → B1+)</p>
+    </header>
+
+    <nav class="sticky-nav shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-center space-x-2 md:space-x-4">
+            <a href="#intro" class="tab-button text-sm md:text-base">Úvod</a>
+            <a href="#rocniky" class="tab-button text-sm md:text-base">Ročníky</a>
+            <a href="#kompetence" class="tab-button text-sm md:text-base">Kompetence</a>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-4 md:p-8 space-y-16">
+
+        <section id="intro" class="pt-8">
+            <h2 class="text-3xl font-bold text-center mb-8" style="color: #8B4513;">Specifika výuky na gymnáziu</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card md:col-span-2 space-y-4">
+                    <p class="text-lg">
+                        Náš kurikulární plán klade zvýšený důraz na prvky, které reflektují profil absolventa gymnázia. Cílem není jen znalost jazyka, ale jeho aktivní využití v akademickém a profesním životě.
+                    </p>
+                    <dl>
+                        <dt>1. Hlubší pochopení témat a souvislostí</dt>
+                        <dd>Výuka se zaměřuje na rozvoj komplexního vyjadřování, zdůvodňování a argumentace (B1), nikoli jen na reprodukci jednoduchých frází. Podporujeme diskuzi o abstraktnějších tématech (etika, společnost, budoucnost).</dd>
+                        
+                        <dt>2. Propojení s ostatními předměty</dt>
+                        <dd>Jazyk je prostředkem pro získávání informací. Studenti pracují s autentickými odbornými texty z oblasti svého zájmu (přírodověda, historie, umění) a využívají angličtinu k obhajobě projektů z jiných předmětů.</dd>
+
+                        <dt>3. Aktivní komunikace a mediace</dt>
+                        <dd>Klíčový důraz je kladen na plynulost, sebevědomí v přímém rozhovoru a dovednosti mediace (zprostředkování informací) a moderování skupinové práce.</dd>
+                    </dl>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="card text-center">
+                        <span class="text-6xl font-extrabold" style="color: #A0522D;">96</span>
+                        <p class="text-xl font-semibold text-gray-700">Hodin ročně</p>
+                        <span class="text-sm text-gray-500">Intenzivní rozvoj dovedností</span>
+                    </div>
+                    <div class="card" style="background-color: #FFF8E1; border-color: #BC8F8F;">
+                        <h3 class="text-xl font-bold mb-2" style="color: #8B4513;">Práce s nadanými žáky (B2)</h3>
+                        <p class="text-sm">
+                            Jazykově nadaní žáci plní výstupy formou samostatných projektů, analyzují komplexní texty a jsou vedeni k moderování diskuzí a rešeršní práci s odbornými zdroji.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="rocniky" class="pt-8">
+            <h2 class="text-3xl font-bold text-center mb-4" style="color: #8B4513;">Průřez ročníky (A2 → B1+)</h2>
+            <p class="text-lg text-center text-gray-700 max-w-3xl mx-auto mb-6">
+                Prozkoumejte zaměření jednotlivých ročníků. Každý ročník má dotaci 96 hodin. Kliknutím na záložku zobrazíte interaktivní přehled hodinové dotace a podrobný rozpis metodiky pro daný ročník.
+            </p>
+
+            <div class="flex justify-center flex-wrap gap-2 mb-6">
+                <button id="tab-prima" class="tab-button active" onclick="switchTab('prima')">Prima (A2)</button>
+                <button id="tab-sekunda" class="tab-button" onclick="switchTab('sekunda')">Sekunda (A2/B1)</button>
+                <button id="tab-tercie" class="tab-button" onclick="switchTab('tercie')">Tercie (B1)</button>
+                <button id="tab-kvarta" class="tab-button" onclick="switchTab('kvarta')">Kvarta (B1+)</button>
+            </div>
+
+            <div id="content-prima" class="tab-content card">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" style="color: #A0522D;">Prima: Základní dovednosti (A2)</h3>
+                        <div class="chart-container">
+                            <canvas id="primaChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="max-h-[450px] overflow-y-auto pr-2">
+                        <p class="mb-4 text-sm">V Primě je kladen důraz na zvládnutí každodenních situací, porozumění jednoduchým textům a pokynům a schopnost popsat své okolí a potřeby.</p>
+                        <dl>
+                            <dt>Rozumí návodům a pokynům</dt>
+                            <dd>Okruh: Instrukce a postupy (12h). Metodika: Tvorba a plnění pokynů (recept, cesta), hry se slepým následováním instrukcí.</dd>
+                            <dt>Rozumí obsahu textů z každodenního života</dt>
+                            <dd>Okruh: Každodenní život a texty (24h). Metodika: Práce s jízdními řády, jednoduchými články; cvičení na scanning a skimming.</dd>
+                            <dt>Popíše věci, osoby, místa, situace</dt>
+                            <dd>Okruh: Popis a charakteristika (18h). Metodika: Prezentace rodiny, popis obrázku (Picture Description).</dd>
+                            <dt>Komunikuje o svých potřebách</dt>
+                            <dd>Okruh: Funkční komunikace (18h). Metodika: Modelové situace (v obchodě, u lékaře), nácvik zdvořilostních frází.</dd>
+                            <dt>Napíše jednoduchý vzkaz nebo e-mail</dt>
+                            <dd>Okruh: Písemná komunikace I. (12h). Metodika: Tvorba krátkých vzkazů, psaní informálního e-mailu.</dd>
+                            <dt>Účastní se přímého rozhovoru o zájmech</dt>
+                            <dd>Okruh: Interakce a zájmy (12h). Metodika: Diskuzní kluby (koníčky, filmy), cvičení na rychlou reakci.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-sekunda" class="tab-content card hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" style="color: #A0522D;">Sekunda: Narace a Média (A2/B1)</h3>
+                        <div class="chart-container">
+                            <canvas id="sekundaChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="max-h-[450px] overflow-y-auto pr-2">
+                        <p class="mb-4 text-sm">V Sekundě se zaměření posouvá na vyprávění příběhů, porozumění médiím (zprávy, vlogy) a schopnost vyjádřit a reagovat na emoce.</p>
+                        <dl>
+                            <dt>Rozumí hlavním myšlenkám v mluveném projevu</dt>
+                            <dd>Okruh: Poslech s porozuměním (18h). Metodika: Práce s podcasty pro teenagery, shrnutí hlavních bodů.</dd>
+                            <dt>Rozumí hlavním myšlenkám obsahu v médiích</dt>
+                            <dd>Okruh: Mediální angličtina (12h). Metodika: Sledování zpráv (BBC Learning English), debata o obsahu.</dd>
+                            <dt>Rozumí jednodušším audiovizuálním příběhům</dt>
+                            <dd>Okruh: Narace a film (12h). Metodika: Práce s krátkými filmy a animacemi, identifikace postav a děje.</dd>
+                            <dt>Vypráví nebo popíše vlastní/cizí zážitek</dt>
+                            <dd>Okruh: Narativní dovednosti (24h). Metodika: Storytelling o prázdninách, nácvik použití minulých časů.</dd>
+                            <dt>Napíše krátký souvislý text</dt>
+                            <dd>Okruh: Písemná komunikace II. (18h). Metodika: Psaní neformálních dopisů s použitím pojících výrazů (cohesive devices).</dd>
+                            <dt>Vyjádří své pocity a reaguje na ně</dt>
+                            <dd>Okruh: Emoce a reakce (12h). Metodika: Modelování empatických reakcí, práce s adjektivy popisujícími emoce.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="content-tercie" class="tab-content card hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" style="color: #A0522D;">Tercie: Názory a Diskuse (B1)</h3>
+                        <div class="chart-container">
+                            <canvas id="tercieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="max-h-[450px] overflow-y-auto pr-2">
+                        <p class="mb-4 text-sm">V Tercii je kladen důraz na akademické dovednosti: formulaci a obhajobu názorů, vedení diskuse, shrnování textů (mediaci) a práci s beletrií.</p>
+                        <dl>
+                            <dt>Rozumí obsahu jednoduchých uměleckých textů</dt>
+                            <dd>Okruh: Čtení beletrie (12h). Metodika: Analýza krátkých povídek, interpretace symboliky a témat.</dd>
+                            <dt>Vyjádří a zdůvodní své názory</dt>
+                            <dd>Okruh: Vlastní názor a argumentace I. (24h). Metodika: Příprava krátkých esejů s obhajobou názoru, formulace argumentů.</dd>
+                            <dt>Diskutuje o tématech, reaguje na názory</dt>
+                            <dd>Okruh: Diskuzní dovednosti (18h). Metodika: Školní debaty na aktuální sociální témata, turnaje v argumentaci.</dd>
+                            <dt>Shrne obsah mluveného a psaného textu</dt>
+                            <dd>Okruh: Shrnování a mediace (18h). Metodika: Cvičení na parafrázování a zkracování článků, tvorba abstraktů.</dd>
+                            <dt>Účastní se přímého rozhovoru (plynulost)</dt>
+                            <dd>Okruh: Plynulost a interakce (18h). Metodika: Role-play s komplexnějšími tématy (plánování projektu, řešení dilematu).</dd>
+                            <dt>Zaznamenává si klíčové informace</dt>
+                            <dd>Okruh: Akademické dovednosti I. (6h). Metodika: Nácvik efektivního psaní poznámek (mind-mapping, zkratky).</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-kvarta" class="tab-content card hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" style="color: #A0522D;">Kvarta: Prezentace a Mediace (B1+)</h3>
+                        <div class="chart-container">
+                            <canvas id="kvartaChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="max-h-[450px] overflow-y-auto pr-2">
+                        <p class="mb-4 text-sm">Kvarta syntetizuje nabyté dovednosti. Důraz je kladen na prezentační dovednosti, práci s odbornými texty, mediaci a moderování.</p>
+                        <dl>
+                            <dt>Rozumí odborným textům z oblasti zájmu</dt>
+                            <dd>Okruh: Čtení odborných textů (18h). Metodika: Rešeršní práce k projektu, čtení populárně-vědeckých článků.</dd>
+                            <dt>Popíše své pocity, představy, přání a ambice</dt>
+                            <dd>Okruh: Budoucnost a ambice (18h). Metodika: Příprava fiktivního pohovoru (Job Interview), psaní motivačního dopisu.</dd>
+                            <dt>Prezentuje téma z oblasti svého zájmu</dt>
+                            <dd>Okruh: Prezentační dovednosti (30h). Metodika: Tvorba komplexní prezentace, nácvik práce s otázkami publika.</dd>
+                            <dt>Zprostředkuje dílčí informace</dt>
+                            <dd>Okruh: Mediace a interpretace (18h). Metodika: Tlumočení/překlad krátkého textu, vysvětlení komplexního grafu.</dd>
+                            <dt>Moderuje jednoduchou interakci ve skupině</dt>
+                            <dd>Okruh: Moderování a facilitace (12h). Metodika: Vedení diskuzí ve skupině, delegování úkolů při projektu.</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="kompetence" class="pt-8">
+            <h2 class="text-3xl font-bold text-center mb-8" style="color: #8B4513;">Plnění Klíčových Kompetencí (KK)</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <div class="competency-card border-l-A0522D" style="border-left-color: #A0522D;">
+                    <strong class="font-bold text-lg" style="color: #A0522D;">KKU (k učení)</strong>
+                    <p class="text-sm">Využívání slovníků a zdrojů k samostatné korekci chyb. Plánování, jaké gramatické téma se doučit pro zlepšení.</p>
+                </div>
+                <div class="competency-card" style="border-left-color: #BC8F8F;">
+                    <strong class="font-bold text-lg" style="color: #8B4513;">KRP (k řešení problémů)</strong>
+                    <p class="text-sm">Překonávání komunikačních bariér aktivním přeformulováním (opisem) neznámých slov, aby byla zachována plynulost.</p>
+                </div>
+                <div class="competency-card" style="border-left-color: #A0522D;">
+                    <strong class="font-bold text-lg" style="color: #A0522D;">KKK (komunikační)</strong>
+                    <p class="text-sm">Používání jazyka s ohledem na kontext (formální e-mail vs. vzkaz) a obhajoba názorů s argumentačními frázemi.</p>
+                </div>
+                <div class="competency-card" style="border-left-color: #BC8F8F;">
+                    <strong class="font-bold text-lg" style="color: #8B4513;">KOS (osobnostní a sociální)</strong>
+                    <p class="text-sm">Překonávání strachu z chyby při mluvení. Projevování empatie a adekvátní reakce na pocity ostatních.</p>
+                </div>
+                <div class="competency-card" style="border-left-color: #BC8F8F;">
+                    <strong class="font-bold text-lg" style="color: #8B4513;">KOB (k občanství)</strong>
+                    <p class="text-sm">Využití angličtiny ke sledování mezinárodních zpráv a diskuzi o globálních tématech (udržitelnost, cíle OSN).</p>
+                </div>
+                <div class="competency-card" style="border-left-color: #A0522D;">
+                    <strong class="font-bold text-lg" style="color: #A0522D;">KPP (k podnikavosti)</strong>
+                    <p class="text-sm">Plánování fiktivních projektů (cestování, školní výlet) a simulace profesních situací (pracovní pohovor).</p>
+                </div>
+                <div class="competency-card" style="border-left-color: #BC8F8F;">
+                    <strong class="font-bold text-lg" style="color: #8B4513;">KKT (kulturní)</strong>
+                    <p class="text-sm">Oceňování kulturního kontextu beletrie a filmů. Srovnávání zvyklostí české a anglofonní kultury.</p>
+                </div>
+                <div class="competency-card" style="border-left-color: #A0522D;">
+                    <strong class="font-bold text-lg" style="color: #A0522D;">KDI (digitální)</strong>
+                    <p class="text-sm">Kritické posuzování autentických online zdrojů a využití nástrojů (AI, korektory) pro zlepšení vlastních textů.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center p-8 mt-12 border-t" style="border-color: #D2B48C;">
+        <p class="text-sm" style="color: #5D4037;">Interaktivní kurikulum vytvořené na základě RVP ZV (Revize 2025).</p>
+    </footer>
+
+    <script>
+        const tabButtons = {
+            prima: document.getElementById('tab-prima'),
+            sekunda: document.getElementById('tab-sekunda'),
+            tercie: document.getElementById('tab-tercie'),
+            kvarta: document.getElementById('tab-kvarta')
+        };
+        const tabContents = {
+            prima: document.getElementById('content-prima'),
+            sekunda: document.getElementById('content-sekunda'),
+            tercie: document.getElementById('content-tercie'),
+            kvarta: document.getElementById('content-kvarta')
+        };
+        let charts = {};
+
+        function switchTab(tabName) {
+            Object.values(tabButtons).forEach(button => button.classList.remove('active'));
+            Object.values(tabContents).forEach(content => content.classList.add('hidden'));
+
+            tabButtons[tabName].classList.add('active');
+            tabContents[tabName].classList.remove('hidden');
+
+            if (!charts[tabName]) {
+                initializeChart(tabName);
+            }
+        }
+
+        function wrapLabel(str, maxWidth = 16) {
+            if (!str) return '';
+            if (str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine += (currentLine.length > 0 ? ' ' : '') + word;
+                }
+            });
+            if (currentLine.length > 0) {
+                lines.push(currentLine);
+            }
+            return lines;
+        }
+
+        const chartTooltipCallback = {
+            title: function(tooltipItems) {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            }
+        };
+
+        const chartPalette = ['#D2B48C', '#A0522D', '#BC8F8F', '#8B4513', '#F0EAD6', '#5D4037'];
+
+        const chartData = {
+            prima: {
+                labels: [
+                    wrapLabel('Rozumí návodům a pokynům'),
+                    wrapLabel('Rozumí obsahu textů z každodenního života'),
+                    wrapLabel('Popíše věci, osoby, místa, situace'),
+                    wrapLabel('Komunikuje o svých potřebách'),
+                    wrapLabel('Napíše jednoduchý vzkaz nebo e-mail'),
+                    wrapLabel('Účastní se přímého rozhovoru o zájmech')
+                ],
+                data: [12, 24, 18, 18, 12, 12]
+            },
+            sekunda: {
+                labels: [
+                    wrapLabel('Rozumí hlavním myšlenkám v mluveném projevu'),
+                    wrapLabel('Rozumí hlavním myšlenkám obsahu v médiích'),
+                    wrapLabel('Rozumí jednodušším audiovizuálním příběhům'),
+                    wrapLabel('Vypráví nebo popíše vlastní/cizí zážitek'),
+                    wrapLabel('Napíše krátký souvislý text'),
+                    wrapLabel('Vyjádří své pocity a reaguje na ně')
+                ],
+                data: [18, 12, 12, 24, 18, 12]
+            },
+            tercie: {
+                labels: [
+                    wrapLabel('Rozumí obsahu jednoduchých uměleckých textů'),
+                    wrapLabel('Vyjádří a zdůvodní své názory'),
+                    wrapLabel('Diskutuje o tématech, reaguje na názory'),
+                    wrapLabel('Shrne obsah mluveného a psaného textu'),
+                    wrapLabel('Účastní se přímého rozhovoru (plynulost)'),
+                    wrapLabel('Zaznamenává si klíčové informace')
+                ],
+                data: [12, 24, 18, 18, 18, 6]
+            },
+            kvarta: {
+                labels: [
+                    wrapLabel('Rozumí odborným textům z oblasti zájmu'),
+                    wrapLabel('Popíše své pocity, představy, přání a ambice'),
+                    wrapLabel('Prezentuje téma z oblasti svého zájmu'),
+                    wrapLabel('Zprostředkuje dílčí informace'),
+                    wrapLabel('Moderuje jednoduchou interakci ve skupině')
+                ],
+                data: [18, 18, 30, 18, 12]
+            }
+        };
+
+        function initializeChart(chartName) {
+            const ctx = document.getElementById(chartName + 'Chart').getContext('2d');
+            charts[chartName] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData[chartName].labels,
+                    datasets: [{
+                        label: 'Hodinová dotace',
+                        data: chartData[chartName].data,
+                        backgroundColor: chartPalette,
+                        borderColor: '#F5F5DC',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false 
+                        },
+                        tooltip: {
+                            callbacks: chartTooltipCallback,
+                            backgroundColor: '#FFFFFF',
+                            titleColor: '#8B4513',
+                            bodyColor: '#5D4037',
+                            borderColor: '#D2B48C',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeChart('prima');
+        });
+    </script>
+</body>
+</html>
