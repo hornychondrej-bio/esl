@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simul·tor AxonovÈho hrbolku: ZÛna integrace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; user-select: none; -webkit-user-select: none; touch-action: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Oscilloscope Grid */
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, #1e293b 1px, transparent 1px),
+                linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Animations */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        
+        .pulse-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: #facc15;
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+            animation: pulse-ring 0.6s ease-out forwards;
+            top: 50%;
+            left: 50%;
+            margin-top: -50px;
+            margin-left: -50px;
+            z-index: 0;
+        }
+
+        .key-hint {
+            box-shadow: 0 4px 0 #334155;
+            transition: transform 0.05s, box-shadow 0.05s;
+        }
+        .key-hint:active, .key-active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #334155;
+        }
+
+        /* Ion Bar Transitions - Smoother now */
+        .ion-bar {
+            transition: height 0.05s linear;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden font-sans">
+
+    <!-- Top Bar -->
+    <header class="bg-slate-900 border-b border-slate-700 p-4 flex justify-between items-center shadow-lg z-20">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-white tracking-tight">Simul·tor AxonovÈho hrbolku</h1>
+                <p class="text-xs text-slate-400">Logika sumace a integrace sign·lu</p>
+            </div>
+        </div>
+
+        <!-- Task Monitor -->
+        <div class="flex-1 mx-8 hidden md:block">
+            <div class="bg-slate-800 rounded-full h-2 w-full relative overflow-hidden">
+                <div id="voltage-bar" class="absolute left-0 top-0 bottom-0 bg-blue-500 transition-all duration-75" style="width: 0%"></div>
+                <!-- Threshold Marker on Bar: Corrected to approx 27% ((-55 - (-90)) / 130) -->
+                <div class="absolute left-[27%] top-0 bottom-0 w-1 bg-yellow-400 z-10 shadow-[0_0_10px_rgba(250,204,21,0.8)]"></div>
+            </div>
+            <div class="flex justify-between text-xs text-slate-500 mt-1 font-mono relative h-4">
+                <span class="absolute left-0">Klidov˝ (-70mV)</span>
+                <!-- Aligned roughly with the marker -->
+                <span class="absolute left-[27%] -translate-x-1/2 text-yellow-400 font-bold">Prahov˝ (-55mV)</span>
+                <span class="absolute right-0">Vrchol (+30mV)</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="text-right">
+                <div class="text-xs text-slate-400">Membr·nov˝ potenci·l</div>
+                <div id="voltage-readout" class="text-2xl font-mono text-blue-400 font-bold">-70.0 mV</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex flex-col md:flex-row h-full relative">
+        
+        <!-- Left: The Neuron View -->
+        <div class="flex-1 bg-slate-900 relative flex items-center justify-center overflow-hidden" id="neuron-container">
+            
+            <!-- Background Grid -->
+            <div class="absolute inset-0 grid-bg opacity-20"></div>
+
+            <!-- Canvas for Dendrites/Axon/Particles -->
+            <canvas id="neuronCanvas" class="absolute inset-0 z-10 block"></canvas>
+
+            <!-- The Neuron Body (Central Hub) - Purely Visual Overlay -->
+            <div class="relative z-20 w-48 h-48 bg-blue-600/20 rounded-full border-4 border-blue-500 flex items-center justify-center backdrop-blur-sm shadow-[0_0_50px_rgba(59,130,246,0.3)]" id="soma">
+                <div class="text-center">
+                    <div class="text-blue-200 font-bold text-lg">AXONOV› HRBOLEK</div>
+                    <div class="text-xs text-blue-300">ZÛna integrace (sumace)</div>
+                </div>
+                <!-- Pulse Container -->
+                <div id="pulse-container"></div>
+            </div>
+
+            <!-- Input Controls (Floating Pads) -->
+            
+            <!-- Input 1: Glutamate (Weak Excitatory) -->
+            <button class="absolute top-10 left-10 md:top-20 md:left-20 bg-slate-800 hover:bg-slate-700 border-2 border-green-500/50 rounded-xl p-4 w-40 transition-all key-hint group select-none touch-manipulation z-30" id="btn-input-0">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-bold text-green-400 uppercase">Glutam·t</span>
+                    <span class="bg-slate-900 text-slate-400 text-xs px-2 py-1 rounded border border-slate-700 font-mono">Q</span>
+                </div>
+                <div class="text-white text-sm">ExcitaËnÌ (Slab˝)</div>
+                <div class="text-xs text-slate-500 mt-1">+5 mV (EPSP)</div>
+            </button>
+
+            <!-- Input 2: Acetylcholine (Strong Excitatory) -->
+            <button class="absolute bottom-10 left-10 md:bottom-20 md:left-20 bg-slate-800 hover:bg-slate-700 border-2 border-green-400 rounded-xl p-4 w-40 transition-all key-hint group select-none touch-manipulation z-30" id="btn-input-1">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-bold text-green-400 uppercase">Acetylcholin</span>
+                    <span class="bg-slate-900 text-slate-400 text-xs px-2 py-1 rounded border border-slate-700 font-mono">W</span>
+                </div>
+                <div class="text-white text-sm">ExcitaËnÌ (Siln˝)</div>
+                <div class="text-xs text-slate-500 mt-1">+15 mV (EPSP)</div>
+            </button>
+
+            <!-- Input 3: GABA (Inhibitory) -->
+            <button class="absolute top-10 right-10 md:top-20 md:right-20 bg-slate-800 hover:bg-slate-700 border-2 border-red-500 rounded-xl p-4 w-40 transition-all key-hint group select-none touch-manipulation z-30" id="btn-input-2">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-bold text-red-400 uppercase">GABA</span>
+                    <span class="bg-slate-900 text-slate-400 text-xs px-2 py-1 rounded border border-slate-700 font-mono">E</span>
+                </div>
+                <div class="text-white text-sm">InhibiËnÌ</div>
+                <div class="text-xs text-slate-500 mt-1">-10 mV (IPSP)</div>
+            </button>
+
+            <!-- Input 4: Noise/Modulatory -->
+            <button class="absolute bottom-10 right-10 md:bottom-20 md:right-20 bg-slate-800 hover:bg-slate-700 border-2 border-purple-500 rounded-xl p-4 w-40 transition-all key-hint group select-none touch-manipulation z-30" id="btn-input-3">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-bold text-purple-400 uppercase">Synaptick˝ äum</span>
+                    <span class="bg-slate-900 text-slate-400 text-xs px-2 py-1 rounded border border-slate-700 font-mono">R</span>
+                </div>
+                <div class="text-white text-sm" id="noise-status">äum: VYPNUTO</div>
+                <div class="text-xs text-slate-500 mt-1 text-purple-300">Nep¯edvÌdateln˝!</div>
+            </button>
+
+        </div>
+
+        <!-- Right: Oscilloscope & Scenarios -->
+        <div class="h-auto md:w-96 bg-black border-l border-slate-700 flex flex-col z-30 shadow-xl overflow-hidden">
+            
+            <!-- Oscilloscope Screen -->
+            <div class="h-48 relative bg-black border-b border-slate-800">
+                <canvas id="oscCanvas" class="w-full h-full block"></canvas>
+                
+                <!-- Labels -->
+                <div class="absolute right-2 top-2 text-xs font-mono text-green-500 bg-black/50 px-1 rounded">Re·ln˝ Ëas (mV)</div>
+                <div class="absolute left-2 top-[73%] w-full border-t border-dashed border-yellow-500/50 text-yellow-500 text-[10px] pl-1 pointer-events-none -mt-3">Pr·h (-55)</div>
+                <div class="absolute left-2 top-[85%] w-full border-t border-slate-600 text-slate-500 text-[10px] pl-1 pointer-events-none">Klidov˝ (-70)</div>
+            </div>
+
+            <!-- Ion Balance Panel (NEW) -->
+            <div class="bg-slate-900 border-b border-slate-800 p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase">Iontov· Bilance (Uvnit¯ buÚky)</h3>
+                    <i class="fa-solid fa-flask text-slate-600 text-xs"></i>
+                </div>
+                <div class="flex gap-4 h-24">
+                    <!-- Sodium (Na+) Bar -->
+                    <div class="flex-1 flex flex-col justify-end relative bg-slate-800 rounded overflow-hidden border border-slate-700">
+                        <div id="bar-na" class="ion-bar w-full bg-orange-500 opacity-90" style="height: 10%;"></div>
+                        <div class="absolute bottom-1 w-full text-center text-[10px] font-bold text-white drop-shadow-md">Na+ (SodÌk)</div>
+                        <div class="absolute top-1 right-1 text-[9px] text-orange-300" id="val-na">NÌzk·</div>
+                    </div>
+                    <!-- Potassium (K+) Bar -->
+                    <div class="flex-1 flex flex-col justify-end relative bg-slate-800 rounded overflow-hidden border border-slate-700">
+                        <div id="bar-k" class="ion-bar w-full bg-blue-500 opacity-90" style="height: 90%;"></div>
+                        <div class="absolute bottom-1 w-full text-center text-[10px] font-bold text-white drop-shadow-md">K+ (DraslÌk)</div>
+                        <div class="absolute top-1 right-1 text-[9px] text-blue-300" id="val-k">Vysok·</div>
+                    </div>
+                </div>
+                <div class="text-[10px] text-slate-500 mt-2 text-center italic">
+                    *Na+ vstupuje pouze p¯i AP, K+ unik· p¯i repolarizaci. N·vrat zajiöùuje pumpa.
+                </div>
+            </div>
+
+            <!-- Scenarios / Challenges -->
+            <div class="flex-1 bg-slate-900 p-4 overflow-y-auto">
+                <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wider border-b border-slate-700 pb-2">
+                    <i class="fa-solid fa-gamepad mr-2"></i>Experimenty
+                </h3>
+
+                <!-- Scenario 1 -->
+                <div class="bg-slate-800 rounded-lg p-3 mb-3 border border-slate-700 hover:border-blue-500 transition-colors cursor-pointer" onclick="loadScenario(1)">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-blue-400 text-sm">1. »asov· sumace</span>
+                        <i class="fa-solid fa-clock text-slate-500 text-xs"></i>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Vstup A (Glutam·t) je slab˝. MaËkejte rychle <b class="text-white bg-slate-700 px-1 rounded">Q</b> pro seËtenÌ potenci·l˘.
+                    </p>
+                </div>
+
+                <!-- Scenario 2 -->
+                <div class="bg-slate-800 rounded-lg p-3 mb-3 border border-slate-700 hover:border-blue-500 transition-colors cursor-pointer" onclick="loadScenario(2)">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-blue-400 text-sm">2. Prostorov· sumace</span>
+                        <i class="fa-solid fa-users text-slate-500 text-xs"></i>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Kombinujte <b class="text-white bg-slate-700 px-1 rounded">Q</b> a <b class="text-white bg-slate-700 px-1 rounded">W</b> (Acetylcholin) souËasnÏ.
+                    </p>
+                </div>
+
+                <!-- Scenario 3 -->
+                <div class="bg-slate-800 rounded-lg p-3 border border-slate-700 hover:border-blue-500 transition-colors cursor-pointer" onclick="loadScenario(3)">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-blue-400 text-sm">3. Kontrola epilepsie</span>
+                        <i class="fa-solid fa-shield-virus text-slate-500 text-xs"></i>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Hladina öumu je kritick·! Pouûijte GABA <b class="text-white bg-slate-700 px-1 rounded">E</b> k zastavenÌ palby.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Log -->
+            <div class="h-32 bg-slate-950 p-2 font-mono text-[10px] text-green-400 overflow-y-auto" id="event-log">
+                <div>> SYST…M INICIALIZOV¡N</div>
+                <div>> AXONOV› HRBOLEK PÿIPRAVEN</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Overlay -->
+    <div id="alert-overlay" class="pointer-events-none fixed inset-0 flex items-center justify-center z-50 opacity-0 transition-opacity duration-300">
+        <div class="bg-yellow-500 text-black font-black text-4xl md:text-6xl px-8 py-4 rounded-xl shadow-[0_0_100px_rgba(234,179,8,0.8)] transform scale-110 text-center">
+            AK»NÕ POTENCI¡L<br>SPUäTÃN!
+        </div>
+    </div>
+
+    <script>
+        // --- Physics Engine Constants ---
+        const RESTING_POTENTIAL = -70;
+        const THRESHOLD = -55;
+        const PEAK_POTENTIAL = 30; 
+        const HYPERPOLARIZATION = -90; 
+        const DECAY_FACTOR = 0.05; 
+        
+        const MIN_RANGE = -90;
+        const MAX_RANGE = 40;
+        const RANGE_SPAN = MAX_RANGE - MIN_RANGE;
+
+        // --- State ---
+        let voltage = RESTING_POTENTIAL;
+        let refractoryTimer = 0; 
+        const REFRACTORY_DURATION = 90; 
+        
+        let particles = []; 
+        let graphData = new Array(300).fill(RESTING_POTENTIAL);
+        let frame = 0;
+        
+        const inputs = [
+            { id: 0, type: 'excitatory', strength: 5, color: '#4ade80', name: 'Glutam·t' },
+            { id: 1, type: 'excitatory', strength: 15, color: '#22c55e', name: 'Acetylcholin' },
+            { id: 2, type: 'inhibitory', strength: -10, color: '#f87171', name: 'GABA' },
+            { id: 3, type: 'noise', strength: 6, color: '#a855f7', name: 'äum', active: false }
+        ];
+
+        // --- DOM Elements ---
+        const neuronCanvas = document.getElementById('neuronCanvas');
+        const nCtx = neuronCanvas.getContext('2d');
+        const oscCanvas = document.getElementById('oscCanvas');
+        const oCtx = oscCanvas.getContext('2d');
+        const voltageReadout = document.getElementById('voltage-readout');
+        const voltageBar = document.getElementById('voltage-bar');
+        const alertOverlay = document.getElementById('alert-overlay');
+        const log = document.getElementById('event-log');
+        const somaDiv = document.getElementById('soma');
+        
+        // Ion Bars
+        const barNa = document.getElementById('bar-na');
+        const barK = document.getElementById('bar-k');
+        const valNa = document.getElementById('val-na');
+        const valK = document.getElementById('val-k');
+
+        // --- Resizing ---
+        function resize() {
+            neuronCanvas.width = neuronCanvas.parentElement.offsetWidth;
+            neuronCanvas.height = neuronCanvas.parentElement.offsetHeight;
+            oscCanvas.width = oscCanvas.parentElement.offsetWidth;
+            oscCanvas.height = oscCanvas.parentElement.offsetHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- Input Logic ---
+        function triggerInput(index) {
+            const input = inputs[index];
+            const btn = document.getElementById(`btn-input-${index}`);
+            
+            btn.classList.add('key-active');
+            setTimeout(() => btn.classList.remove('key-active'), 100);
+
+            let startX, startY;
+            const w = neuronCanvas.width;
+            const h = neuronCanvas.height;
+            const cx = w/2;
+            const cy = h/2;
+
+            if(index === 0) { startX = 0; startY = h * 0.2; }
+            else if(index === 1) { startX = 0; startY = h * 0.8; }
+            else if(index === 2) { startX = w; startY = h * 0.2; }
+            else if(index === 3) { startX = w; startY = h * 0.8; }
+
+            particles.push({
+                x: startX, y: startY, targetX: cx, targetY: cy,
+                speed: 15, color: input.color, strength: input.strength, name: input.name
+            });
+        }
+
+        function toggleNoise() {
+            inputs[3].active = !inputs[3].active;
+            const btn = document.getElementById('btn-input-3');
+            const status = document.getElementById('noise-status');
+            
+            if(inputs[3].active) {
+                btn.classList.add('border-purple-400');
+                btn.classList.remove('border-purple-500'); 
+                status.innerText = "äum: AKTIVNÕ";
+                logEvent("GENER¡TOR äUMU SPUäTÃN");
+            } else {
+                btn.classList.remove('border-purple-400');
+                btn.classList.add('border-purple-500');
+                status.innerText = "äum: VYPNUTO";
+                logEvent("GENER¡TOR äUMU ZASTAVEN");
+            }
+        }
+
+        function initControls() {
+            for(let i=0; i<4; i++) {
+                const btn = document.getElementById(`btn-input-${i}`);
+                if(!btn) continue;
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); 
+                    if(i === 3) toggleNoise(); 
+                    else triggerInput(i);      
+                }, { passive: false });
+                btn.addEventListener('mousedown', (e) => {
+                    if(i === 3) toggleNoise();
+                    else triggerInput(i);
+                });
+            }
+        }
+        initControls();
+
+        window.addEventListener('keydown', (e) => {
+            if(e.repeat) return;
+            switch(e.key.toLowerCase()) {
+                case 'q': triggerInput(0); break;
+                case 'w': triggerInput(1); break;
+                case 'e': triggerInput(2); break;
+                case 'r': toggleNoise(); break;
+            }
+        });
+
+        // --- Main Loop ---
+        function update() {
+            frame++;
+
+            // Noise Logic
+            if(inputs[3].active && frame % 8 === 0) {
+                if(Math.random() > 0.5) {
+                    triggerInput(3);
+                }
+            }
+
+            // Voltage Decay & Refractory
+            if (refractoryTimer === 0) {
+                const diff = RESTING_POTENTIAL - voltage;
+                voltage += diff * DECAY_FACTOR;
+            } else {
+                refractoryTimer--;
+                if (refractoryTimer > REFRACTORY_DURATION - 5) {
+                    voltage = PEAK_POTENTIAL; 
+                } else {
+                    const recoveryProgress = 1 - (refractoryTimer / REFRACTORY_DURATION);
+                    if (recoveryProgress < 0.6) {
+                        voltage += (HYPERPOLARIZATION - voltage) * 0.1;
+                    } else {
+                        voltage += (RESTING_POTENTIAL - voltage) * 0.05;
+                    }
+                }
+            }
+
+            // Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                const dx = p.targetX - p.x;
+                const dy = p.targetY - p.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < p.speed) {
+                    applyVoltage(p.strength);
+                    particles.splice(i, 1);
+                    somaDiv.style.borderColor = p.color;
+                    setTimeout(() => somaDiv.style.borderColor = '#3b82f6', 100);
+                } else {
+                    const angle = Math.atan2(dy, dx);
+                    p.x += Math.cos(angle) * p.speed;
+                    p.y += Math.sin(angle) * p.speed;
+                }
+            }
+
+            updateUI();
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        function applyVoltage(amount) {
+            if (refractoryTimer > 0) return; 
+
+            voltage += amount;
+            if (amount === inputs[3].strength) {
+                voltage += (Math.random() * 6 - 2); 
+            }
+
+            if (voltage >= THRESHOLD) {
+                fireActionPotential();
+            }
+        }
+
+        function fireActionPotential() {
+            refractoryTimer = REFRACTORY_DURATION;
+            voltage = PEAK_POTENTIAL;
+            createPulse();
+            logEvent("!!! AK»NÕ POTENCI¡L SPUäTÃN !!!");
+            alertOverlay.style.opacity = 1;
+            setTimeout(() => alertOverlay.style.opacity = 0, 300);
+        }
+
+        function createPulse() {
+            const pulse = document.createElement('div');
+            pulse.className = 'pulse-effect';
+            document.getElementById('pulse-container').appendChild(pulse);
+            setTimeout(() => pulse.remove(), 600);
+        }
+
+        // --- UI Updates Including Ions ---
+        function updateUI() {
+            // Voltage Text
+            voltageReadout.innerText = voltage.toFixed(1) + " mV";
+            if (refractoryTimer > 0) {
+                 voltageReadout.className = "text-2xl font-mono text-slate-500 font-bold opacity-50"; 
+            } else {
+                if(voltage > RESTING_POTENTIAL) voltageReadout.className = "text-2xl font-mono text-green-400 font-bold";
+                else if (voltage < RESTING_POTENTIAL) voltageReadout.className = "text-2xl font-mono text-red-400 font-bold";
+                else voltageReadout.className = "text-2xl font-mono text-blue-400 font-bold";
+            }
+
+            // Voltage Bar
+            const pct = ((voltage - MIN_RANGE) / RANGE_SPAN) * 100;
+            voltageBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+            if (refractoryTimer > 0) voltageBar.className = "absolute left-0 top-0 bottom-0 bg-slate-600 transition-all duration-75"; 
+            else voltageBar.className = "absolute left-0 top-0 bottom-0 bg-blue-500 transition-all duration-75";
+
+            // --- ION LOGIC REVISED (More Biological) ---
+            let naLevel = 10;
+            let kLevel = 90;
+
+            if (refractoryTimer > 0) {
+                // Progress: 0.0 (Start AP) -> 1.0 (End recovery)
+                const progress = 1 - (refractoryTimer / REFRACTORY_DURATION);
+                
+                if (progress < 0.15) {
+                    // PHASE 1: Depolarization (Influx)
+                    // Na+ channels open fully. Na+ rushes in.
+                    // K+ channels mostly closed or just starting to open.
+                    // Scale 0-1 to 10-90
+                    const pLocal = progress / 0.15;
+                    naLevel = 10 + (80 * pLocal); 
+                    kLevel = 90; 
+                } else if (progress < 0.45) {
+                    // PHASE 2: Repolarization (Efflux)
+                    // Na+ channels inactivate (Na+ is trapped inside, decreases slowly due to pump start)
+                    // K+ channels OPEN fully. K+ rushes OUT rapidly.
+                    const pLocal = (progress - 0.15) / 0.30;
+                    
+                    // Na+ drops slowly
+                    naLevel = 90 - (20 * pLocal); 
+                    
+                    // K+ drops RAPIDLY (efflux)
+                    kLevel = 90 - (60 * pLocal); 
+                } else {
+                    // PHASE 3: Restoration (Na/K Pump)
+                    // Pump moves 3 Na+ OUT, 2 K+ IN.
+                    const pLocal = (progress - 0.45) / 0.55;
+                    
+                    // Na+ removed (70 -> 10)
+                    naLevel = 70 - (60 * pLocal);
+                    
+                    // K+ restored (30 -> 90)
+                    kLevel = 30 + (60 * pLocal);
+                }
+            } else {
+                // RESTING STATE (Sub-threshold)
+                // Voltage Gated Na+ Channels are CLOSED.
+                // Weak signals do NOT cause significant Na+ influx visible on this scale.
+                naLevel = 10;
+                kLevel = 90;
+            }
+
+            // Apply
+            barNa.style.height = naLevel + "%";
+            barK.style.height = kLevel + "%";
+            
+            // Translated labels
+            valNa.innerText = naLevel > 50 ? "Vysok·" : "NÌzk·";
+            valK.innerText = kLevel > 50 ? "Vysok·" : "NÌzk·";
+        }
+
+        function draw() {
+            nCtx.clearRect(0, 0, neuronCanvas.width, neuronCanvas.height);
+            const cx = neuronCanvas.width / 2;
+            const cy = neuronCanvas.height / 2;
+            
+            nCtx.lineWidth = 4;
+            nCtx.lineCap = 'round';
+            
+            const positions = [
+                {x: 0, y: neuronCanvas.height * 0.2, c: '#166534'},
+                {x: 0, y: neuronCanvas.height * 0.8, c: '#166534'},
+                {x: neuronCanvas.width, y: neuronCanvas.height * 0.2, c: '#991b1b'},
+                {x: neuronCanvas.width, y: neuronCanvas.height * 0.8, c: '#6b21a8'} 
+            ];
+
+            positions.forEach(pos => {
+                nCtx.beginPath();
+                nCtx.moveTo(pos.x, pos.y);
+                nCtx.lineTo(cx, cy);
+                nCtx.strokeStyle = pos.c;
+                nCtx.stroke();
+            });
+
+            particles.forEach(p => {
+                nCtx.beginPath();
+                nCtx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+                nCtx.fillStyle = p.color;
+                nCtx.shadowBlur = 10;
+                nCtx.shadowColor = p.color;
+                nCtx.fill();
+                nCtx.shadowBlur = 0;
+            });
+
+            graphData.shift();
+            graphData.push(voltage);
+
+            oCtx.fillStyle = '#000';
+            oCtx.fillRect(0, 0, oscCanvas.width, oscCanvas.height);
+            drawGrid(oCtx, oscCanvas.width, oscCanvas.height);
+
+            oCtx.beginPath();
+            oCtx.lineWidth = 2;
+            oCtx.strokeStyle = refractoryTimer > 0 ? '#475569' : '#22c55e';
+            
+            const step = oscCanvas.width / graphData.length;
+            for(let i=0; i<graphData.length; i++) {
+                const y = mapVoltageToY(graphData[i], oscCanvas.height);
+                if(i===0) oCtx.moveTo(0, y);
+                else oCtx.lineTo(i*step, y);
+            }
+            oCtx.stroke();
+        }
+
+        function drawGrid(ctx, w, h) {
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            
+            const thY = mapVoltageToY(THRESHOLD, h);
+            ctx.beginPath();
+            ctx.moveTo(0, thY);
+            ctx.lineTo(w, thY);
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = '#eab308'; 
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const rY = mapVoltageToY(RESTING_POTENTIAL, h);
+            ctx.beginPath();
+            ctx.moveTo(0, rY);
+            ctx.lineTo(w, rY);
+            ctx.strokeStyle = '#475569'; 
+            ctx.stroke();
+        }
+
+        function mapVoltageToY(v, h) {
+            const pct = (v - MIN_RANGE) / RANGE_SPAN;
+            return h - (pct * h); 
+        }
+
+        function logEvent(msg) {
+            const div = document.createElement('div');
+            div.innerText = `> ${msg}`;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function loadScenario(id) {
+            inputs[3].active = false; 
+            document.getElementById('btn-input-3').classList.remove('border-purple-400');
+            document.getElementById('btn-input-3').classList.add('border-purple-500');
+            document.getElementById('noise-status').innerText = "äum: VYPNUTO";
+            
+            logEvent("-----------------");
+            if (id === 1) {
+                logEvent("SC…N¡ÿ: »ASOV¡ SUMACE");
+                logEvent("⁄KOL: MaËkejte rychle 'Q' pro spuötÏnÌ.");
+            } else if (id === 2) {
+                logEvent("SC…N¡ÿ: PROSTOROV¡ SUMACE");
+                logEvent("⁄KOL: MaËkejte 'Q' a 'W' najednou.");
+            } else if (id === 3) {
+                logEvent("SC…N¡ÿ: KONTROLA EPILEPSIE");
+                toggleNoise(); 
+                logEvent("⁄KOL: Pouûijte 'E' k zastavenÌ palby.");
+            }
+        }
+
+        update();
+
+    </script>
+</body>
+</html>
