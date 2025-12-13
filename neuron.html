@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simul·tor AxonovÈho hrbolku: ZÛna integrace</title>
+    <title>Simul√°tor Axonov√©ho hrbolku: Z√≥na integrace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -62,8 +62,8 @@
                 <i class="fa-solid fa-bolt"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold text-white tracking-tight">Simul·tor AxonovÈho hrbolku</h1>
-                <p class="text-xs text-slate-400">Logika sumace a integrace sign·lu</p>
+                <h1 class="text-xl font-bold text-white tracking-tight">Simul√°tor Axonov√©ho hrbolku</h1>
+                <p class="text-xs text-slate-400">Logika sumace a integrace sign√°lu</p>
             </div>
         </div>
 
@@ -75,16 +75,16 @@
                 <div class="absolute left-[27%] top-0 bottom-0 w-1 bg-yellow-400 z-10 shadow-[0_0_10px_rgba(250,204,21,0.8)]"></div>
             </div>
             <div class="flex justify-between text-xs text-slate-500 mt-1 font-mono relative h-4">
-                <span class="absolute left-0">Klidov˝ (-70mV)</span>
+                <span class="absolute left-0">Klidov√Ω (-70mV)</span>
                 <!-- Aligned roughly with the marker -->
-                <span class="absolute left-[27%] -translate-x-1/2 text-yellow-400 font-bold">Prahov˝ (-55mV)</span>
+                <span class="absolute left-[27%] -translate-x-1/2 text-yellow-400 font-bold">Prahov√Ω (-55mV)</span>
                 <span class="absolute right-0">Vrchol (+30mV)</span>
             </div>
         </div>
 
         <div class="flex items-center gap-4">
             <div class="text-right">
-                <div class="text-xs text-slate-400">Membr·nov˝ potenci·l</div>
+                <div class="text-xs text-slate-400">Membr√°nov√Ω potenci√°l</div>
                 <div id="voltage-readout" class="text-2xl font-mono text-blue-400 font-bold">-70.0 mV</div>
             </div>
         </div>
@@ -105,8 +105,8 @@
             <!-- The Neuron Body (Central Hub) - Purely Visual Overlay -->
             <div class="relative z-20 w-48 h-48 bg-blue-600/20 rounded-full border-4 border-blue-500 flex items-center justify-center backdrop-blur-sm shadow-[0_0_50px_rgba(59,130,246,0.3)]" id="soma">
                 <div class="text-center">
-                    <div class="text-blue-200 font-bold text-lg">AXONOV› HRBOLEK</div>
-                    <div class="text-xs text-blue-300">ZÛna integrace (sumace)</div>
+                    <div class="text-blue-200 font-bold text-lg">AXONOV√ù HRBOLEK</div>
+                    <div class="text-xs text-blue-300">Z√≥na integrace (sumace)</div>
                 </div>
                 <!-- Pulse Container -->
                 <div id="pulse-container"></div>
@@ -117,10 +117,10 @@
             <!-- Input 1: Glutamate (Weak Excitatory) -->
             <button class="absolute top-10 left-10 md:top-20 md:left-20 bg-slate-800 hover:bg-slate-700 border-2 border-green-500/50 rounded-xl p-4 w-40 transition-all key-hint group select-none touch-manipulation z-30" id="btn-input-0">
                 <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-bold text-green-400 uppercase">Glutam·t</span>
+                    <span class="text-xs font-bold text-green-400 uppercase">Glutam√°t</span>
                     <span class="bg-slate-900 text-slate-400 text-xs px-2 py-1 rounded border border-slate-700 font-mono">Q</span>
                 </div>
-                <div class="text-white text-sm">ExcitaËnÌ (Slab˝)</div>
+                <div class="text-white text-sm">Excitaƒçn√≠ (Slab√Ω)</div>
                 <div class="text-xs text-slate-500 mt-1">+5 mV (EPSP)</div>
             </button>
 
@@ -130,7 +130,7 @@
                     <span class="text-xs font-bold text-green-400 uppercase">Acetylcholin</span>
                     <span class="bg-slate-900 text-slate-400 text-xs px-2 py-1 rounded border border-slate-700 font-mono">W</span>
                 </div>
-                <div class="text-white text-sm">ExcitaËnÌ (Siln˝)</div>
+                <div class="text-white text-sm">Excitaƒçn√≠ (Siln√Ω)</div>
                 <div class="text-xs text-slate-500 mt-1">+15 mV (EPSP)</div>
             </button>
 
@@ -140,18 +140,18 @@
                     <span class="text-xs font-bold text-red-400 uppercase">GABA</span>
                     <span class="bg-slate-900 text-slate-400 text-xs px-2 py-1 rounded border border-slate-700 font-mono">E</span>
                 </div>
-                <div class="text-white text-sm">InhibiËnÌ</div>
+                <div class="text-white text-sm">Inhibiƒçn√≠</div>
                 <div class="text-xs text-slate-500 mt-1">-10 mV (IPSP)</div>
             </button>
 
             <!-- Input 4: Noise/Modulatory -->
             <button class="absolute bottom-10 right-10 md:bottom-20 md:right-20 bg-slate-800 hover:bg-slate-700 border-2 border-purple-500 rounded-xl p-4 w-40 transition-all key-hint group select-none touch-manipulation z-30" id="btn-input-3">
                 <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-bold text-purple-400 uppercase">Synaptick˝ äum</span>
+                    <span class="text-xs font-bold text-purple-400 uppercase">Synaptick√Ω ≈†um</span>
                     <span class="bg-slate-900 text-slate-400 text-xs px-2 py-1 rounded border border-slate-700 font-mono">R</span>
                 </div>
-                <div class="text-white text-sm" id="noise-status">äum: VYPNUTO</div>
-                <div class="text-xs text-slate-500 mt-1 text-purple-300">Nep¯edvÌdateln˝!</div>
+                <div class="text-white text-sm" id="noise-status">≈†um: VYPNUTO</div>
+                <div class="text-xs text-slate-500 mt-1 text-purple-300">Nep≈ôedv√≠dateln√Ω!</div>
             </button>
 
         </div>
@@ -164,33 +164,33 @@
                 <canvas id="oscCanvas" class="w-full h-full block"></canvas>
                 
                 <!-- Labels -->
-                <div class="absolute right-2 top-2 text-xs font-mono text-green-500 bg-black/50 px-1 rounded">Re·ln˝ Ëas (mV)</div>
-                <div class="absolute left-2 top-[73%] w-full border-t border-dashed border-yellow-500/50 text-yellow-500 text-[10px] pl-1 pointer-events-none -mt-3">Pr·h (-55)</div>
-                <div class="absolute left-2 top-[85%] w-full border-t border-slate-600 text-slate-500 text-[10px] pl-1 pointer-events-none">Klidov˝ (-70)</div>
+                <div class="absolute right-2 top-2 text-xs font-mono text-green-500 bg-black/50 px-1 rounded">Re√°ln√Ω ƒças (mV)</div>
+                <div class="absolute left-2 top-[73%] w-full border-t border-dashed border-yellow-500/50 text-yellow-500 text-[10px] pl-1 pointer-events-none -mt-3">Pr√°h (-55)</div>
+                <div class="absolute left-2 top-[85%] w-full border-t border-slate-600 text-slate-500 text-[10px] pl-1 pointer-events-none">Klidov√Ω (-70)</div>
             </div>
 
             <!-- Ion Balance Panel (NEW) -->
             <div class="bg-slate-900 border-b border-slate-800 p-4">
                 <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase">Iontov· Bilance (Uvnit¯ buÚky)</h3>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase">Iontov√° Bilance (Uvnit≈ô bu≈àky)</h3>
                     <i class="fa-solid fa-flask text-slate-600 text-xs"></i>
                 </div>
                 <div class="flex gap-4 h-24">
                     <!-- Sodium (Na+) Bar -->
                     <div class="flex-1 flex flex-col justify-end relative bg-slate-800 rounded overflow-hidden border border-slate-700">
                         <div id="bar-na" class="ion-bar w-full bg-orange-500 opacity-90" style="height: 10%;"></div>
-                        <div class="absolute bottom-1 w-full text-center text-[10px] font-bold text-white drop-shadow-md">Na+ (SodÌk)</div>
-                        <div class="absolute top-1 right-1 text-[9px] text-orange-300" id="val-na">NÌzk·</div>
+                        <div class="absolute bottom-1 w-full text-center text-[10px] font-bold text-white drop-shadow-md">Na+ (Sod√≠k)</div>
+                        <div class="absolute top-1 right-1 text-[9px] text-orange-300" id="val-na">N√≠zk√°</div>
                     </div>
                     <!-- Potassium (K+) Bar -->
                     <div class="flex-1 flex flex-col justify-end relative bg-slate-800 rounded overflow-hidden border border-slate-700">
                         <div id="bar-k" class="ion-bar w-full bg-blue-500 opacity-90" style="height: 90%;"></div>
-                        <div class="absolute bottom-1 w-full text-center text-[10px] font-bold text-white drop-shadow-md">K+ (DraslÌk)</div>
-                        <div class="absolute top-1 right-1 text-[9px] text-blue-300" id="val-k">Vysok·</div>
+                        <div class="absolute bottom-1 w-full text-center text-[10px] font-bold text-white drop-shadow-md">K+ (Drasl√≠k)</div>
+                        <div class="absolute top-1 right-1 text-[9px] text-blue-300" id="val-k">Vysok√°</div>
                     </div>
                 </div>
                 <div class="text-[10px] text-slate-500 mt-2 text-center italic">
-                    *Na+ vstupuje pouze p¯i AP, K+ unik· p¯i repolarizaci. N·vrat zajiöùuje pumpa.
+                    *Na+ vstupuje pouze p≈ôi AP, K+ unik√° p≈ôi repolarizaci. N√°vrat zaji≈°≈•uje pumpa.
                 </div>
             </div>
 
@@ -203,22 +203,22 @@
                 <!-- Scenario 1 -->
                 <div class="bg-slate-800 rounded-lg p-3 mb-3 border border-slate-700 hover:border-blue-500 transition-colors cursor-pointer" onclick="loadScenario(1)">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="font-bold text-blue-400 text-sm">1. »asov· sumace</span>
+                        <span class="font-bold text-blue-400 text-sm">1. ƒåasov√° sumace</span>
                         <i class="fa-solid fa-clock text-slate-500 text-xs"></i>
                     </div>
                     <p class="text-xs text-slate-300 leading-relaxed">
-                        Vstup A (Glutam·t) je slab˝. MaËkejte rychle <b class="text-white bg-slate-700 px-1 rounded">Q</b> pro seËtenÌ potenci·l˘.
+                        Vstup A (Glutam√°t) je slab√Ω. Maƒçkejte rychle <b class="text-white bg-slate-700 px-1 rounded">Q</b> pro seƒçten√≠ potenci√°l≈Ø.
                     </p>
                 </div>
 
                 <!-- Scenario 2 -->
                 <div class="bg-slate-800 rounded-lg p-3 mb-3 border border-slate-700 hover:border-blue-500 transition-colors cursor-pointer" onclick="loadScenario(2)">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="font-bold text-blue-400 text-sm">2. Prostorov· sumace</span>
+                        <span class="font-bold text-blue-400 text-sm">2. Prostorov√° sumace</span>
                         <i class="fa-solid fa-users text-slate-500 text-xs"></i>
                     </div>
                     <p class="text-xs text-slate-300 leading-relaxed">
-                        Kombinujte <b class="text-white bg-slate-700 px-1 rounded">Q</b> a <b class="text-white bg-slate-700 px-1 rounded">W</b> (Acetylcholin) souËasnÏ.
+                        Kombinujte <b class="text-white bg-slate-700 px-1 rounded">Q</b> a <b class="text-white bg-slate-700 px-1 rounded">W</b> (Acetylcholin) souƒçasnƒõ.
                     </p>
                 </div>
 
@@ -229,15 +229,15 @@
                         <i class="fa-solid fa-shield-virus text-slate-500 text-xs"></i>
                     </div>
                     <p class="text-xs text-slate-300 leading-relaxed">
-                        Hladina öumu je kritick·! Pouûijte GABA <b class="text-white bg-slate-700 px-1 rounded">E</b> k zastavenÌ palby.
+                        Hladina ≈°umu je kritick√°! Pou≈æijte GABA <b class="text-white bg-slate-700 px-1 rounded">E</b> k zastaven√≠ palby.
                     </p>
                 </div>
             </div>
 
             <!-- Log -->
             <div class="h-32 bg-slate-950 p-2 font-mono text-[10px] text-green-400 overflow-y-auto" id="event-log">
-                <div>> SYST…M INICIALIZOV¡N</div>
-                <div>> AXONOV› HRBOLEK PÿIPRAVEN</div>
+                <div>> SYST√âM INICIALIZOV√ÅN</div>
+                <div>> AXONOV√ù HRBOLEK P≈òIPRAVEN</div>
             </div>
         </div>
     </div>
@@ -245,7 +245,7 @@
     <!-- Alert Overlay -->
     <div id="alert-overlay" class="pointer-events-none fixed inset-0 flex items-center justify-center z-50 opacity-0 transition-opacity duration-300">
         <div class="bg-yellow-500 text-black font-black text-4xl md:text-6xl px-8 py-4 rounded-xl shadow-[0_0_100px_rgba(234,179,8,0.8)] transform scale-110 text-center">
-            AK»NÕ POTENCI¡L<br>SPUäTÃN!
+            AKƒåN√ç POTENCI√ÅL<br>SPU≈†TƒöN!
         </div>
     </div>
 
@@ -271,10 +271,10 @@
         let frame = 0;
         
         const inputs = [
-            { id: 0, type: 'excitatory', strength: 5, color: '#4ade80', name: 'Glutam·t' },
+            { id: 0, type: 'excitatory', strength: 5, color: '#4ade80', name: 'Glutam√°t' },
             { id: 1, type: 'excitatory', strength: 15, color: '#22c55e', name: 'Acetylcholin' },
             { id: 2, type: 'inhibitory', strength: -10, color: '#f87171', name: 'GABA' },
-            { id: 3, type: 'noise', strength: 6, color: '#a855f7', name: 'äum', active: false }
+            { id: 3, type: 'noise', strength: 6, color: '#a855f7', name: '≈†um', active: false }
         ];
 
         // --- DOM Elements ---
@@ -337,13 +337,13 @@
             if(inputs[3].active) {
                 btn.classList.add('border-purple-400');
                 btn.classList.remove('border-purple-500'); 
-                status.innerText = "äum: AKTIVNÕ";
-                logEvent("GENER¡TOR äUMU SPUäTÃN");
+                status.innerText = "≈†um: AKTIVN√ç";
+                logEvent("GENER√ÅTOR ≈†UMU SPU≈†TƒöN");
             } else {
                 btn.classList.remove('border-purple-400');
                 btn.classList.add('border-purple-500');
-                status.innerText = "äum: VYPNUTO";
-                logEvent("GENER¡TOR äUMU ZASTAVEN");
+                status.innerText = "≈†um: VYPNUTO";
+                logEvent("GENER√ÅTOR ≈†UMU ZASTAVEN");
             }
         }
 
@@ -444,7 +444,7 @@
             refractoryTimer = REFRACTORY_DURATION;
             voltage = PEAK_POTENTIAL;
             createPulse();
-            logEvent("!!! AK»NÕ POTENCI¡L SPUäTÃN !!!");
+            logEvent("!!! AKƒåN√ç POTENCI√ÅL SPU≈†TƒöN !!!");
             alertOverlay.style.opacity = 1;
             setTimeout(() => alertOverlay.style.opacity = 0, 300);
         }
@@ -525,8 +525,8 @@
             barK.style.height = kLevel + "%";
             
             // Translated labels
-            valNa.innerText = naLevel > 50 ? "Vysok·" : "NÌzk·";
-            valK.innerText = kLevel > 50 ? "Vysok·" : "NÌzk·";
+            valNa.innerText = naLevel > 50 ? "Vysok√°" : "N√≠zk√°";
+            valK.innerText = kLevel > 50 ? "Vysok√°" : "N√≠zk√°";
         }
 
         function draw() {
@@ -619,19 +619,19 @@
             inputs[3].active = false; 
             document.getElementById('btn-input-3').classList.remove('border-purple-400');
             document.getElementById('btn-input-3').classList.add('border-purple-500');
-            document.getElementById('noise-status').innerText = "äum: VYPNUTO";
+            document.getElementById('noise-status').innerText = "≈†um: VYPNUTO";
             
             logEvent("-----------------");
             if (id === 1) {
-                logEvent("SC…N¡ÿ: »ASOV¡ SUMACE");
-                logEvent("⁄KOL: MaËkejte rychle 'Q' pro spuötÏnÌ.");
+                logEvent("SC√âN√Å≈ò: ƒåASOV√Å SUMACE");
+                logEvent("√öKOL: Maƒçkejte rychle 'Q' pro spu≈°tƒõn√≠.");
             } else if (id === 2) {
-                logEvent("SC…N¡ÿ: PROSTOROV¡ SUMACE");
-                logEvent("⁄KOL: MaËkejte 'Q' a 'W' najednou.");
+                logEvent("SC√âN√Å≈ò: PROSTOROV√Å SUMACE");
+                logEvent("√öKOL: Maƒçkejte 'Q' a 'W' najednou.");
             } else if (id === 3) {
-                logEvent("SC…N¡ÿ: KONTROLA EPILEPSIE");
+                logEvent("SC√âN√Å≈ò: KONTROLA EPILEPSIE");
                 toggleNoise(); 
-                logEvent("⁄KOL: Pouûijte 'E' k zastavenÌ palby.");
+                logEvent("√öKOL: Pou≈æijte 'E' k zastaven√≠ palby.");
             }
         }
 
