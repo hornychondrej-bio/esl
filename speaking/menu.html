@@ -10,12 +10,17 @@
     <div class="container">
         <header>
             <h1>Classroom Decks</h1>
-            <p>Select a topic to generate conversation prompts.</p>
+            <p>Select a topic to start.</p>
         </header>
-
-        <div id="menu-list" class="button-grid">
+	
+	<div class="search-wrapper">
+            <input type="text" id="search-box" placeholder="Search topics..." autocomplete="off">
+        </div>
+        
+	<div id="menu-list" class="button-grid">
             </div>
     </div>
+
 <script>
         async function loadMenu() {
             const container = document.getElementById('menu-list');
@@ -63,11 +68,29 @@
                         <em>Tech details: ${e.message}</em><br><br>
                         <strong>Fix:</strong> If you are opening this file directly (file://), 
                         you must use a Local Server (like VS Code Live Server) 
-                        or upload it to GitHub Pages.
+                        or upload it online.
                     </div>
                 `;
             }
         }
+	// Search Logic
+        const searchInput = document.getElementById('search-box');
+        
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const buttons = document.querySelectorAll('.menu-btn');
+
+            buttons.forEach(btn => {
+                const text = btn.getAttribute('data-search');
+                // Toggle visibility based on match
+                if (text.includes(searchTerm)) {
+                    btn.style.display = 'block';
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+        });
+
         loadMenu();
     </script>
 </body>
