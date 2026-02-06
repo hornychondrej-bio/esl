@@ -12,16 +12,16 @@
             <h1>Classroom Decks</h1>
             <p>Select a topic to start.</p>
         </header>
-	
-	<div class="search-wrapper">
+    
+        <div class="search-wrapper">
             <input type="text" id="search-box" placeholder="Search topics..." autocomplete="off">
         </div>
         
-	<div id="menu-list" class="button-grid">
+        <div id="menu-list" class="button-grid">
             </div>
     </div>
 
-<script>
+    <script>
         async function loadMenu() {
             const container = document.getElementById('menu-list');
             
@@ -55,12 +55,16 @@
                         btn.className = 'menu-btn';
                         btn.innerText = label;
                         btn.href = `stack.html?deck=${encodeURIComponent(file)}`;
+                        
+                        // --- THE MISSING LINE WAS HERE ---
+                        // We must save the label in lowercase so the search bar can find it
+                        btn.setAttribute('data-search', label.toLowerCase());
+                        
                         container.appendChild(btn);
                     }
                 });
 
             } catch (e) {
-                // This catches the "file:///" security error or missing files
                 console.error(e);
                 container.innerHTML = `
                     <div style="padding: 20px; background: #ffebee; color: #c62828; border-radius: 8px;">
@@ -73,7 +77,8 @@
                 `;
             }
         }
-	// Search Logic
+
+        // Search Logic
         const searchInput = document.getElementById('search-box');
         
         searchInput.addEventListener('input', (e) => {
@@ -81,8 +86,10 @@
             const buttons = document.querySelectorAll('.menu-btn');
 
             buttons.forEach(btn => {
-                const text = btn.getAttribute('data-search');
-                // Toggle visibility based on match
+                // --- SAFETY FIX HERE ---
+                // We add " || '' " so it never returns null, effectively preventing the crash.
+                const text = btn.getAttribute('data-search') || '';
+                
                 if (text.includes(searchTerm)) {
                     btn.style.display = 'block';
                 } else {
