@@ -1,2 +1,2 @@
-decks/conditionals.md | Second Conditional Questions
-decks/present_perfect.md | Have you ever...?
+decks/second_conditional.md | Second Conditional Questions
+decks/used_to_types.md | Used to, be used to, get used to
