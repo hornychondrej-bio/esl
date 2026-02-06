@@ -1,0 +1,123 @@
+:root {
+    --bg: #fdfdfd;
+    --card-bg: #ffffff;
+    --text: #333;
+    --accent: #4a90e2; /* Calm Blue */
+    --accent-hover: #357abd;
+    --border: #eee;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 500px; /* Phone optimized width */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Menu Vibes */
+.button-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.menu-btn {
+    display: block;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: var(--shadow);
+    transition: transform 0.1s;
+    border: 1px solid var(--border);
+}
+
+.menu-btn:active {
+    transform: scale(0.98);
+}
+
+/* Stack/Card Vibes */
+.card-display {
+    background: var(--card-bg);
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    font-size: 1.5rem;
+    font-weight: 500;
+    border: 1px solid var(--border);
+}
+
+.main-action-btn {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 18px;
+    font-size: 1.2rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(74, 144, 226, 0.3);
+}
+
+.main-action-btn:active {
+    background-color: var(--accent-hover);
+    transform: translateY(2px);
+}
+
+/* List View */
+.secondary-btn {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+}
+
+#full-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+#full-list li {
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.95rem;
+}
+
+.hidden {
+    display: none;
+}
+
+.back-link {
+    text-decoration: none;
+    color: #888;
+    font-size: 0.9rem;
+}

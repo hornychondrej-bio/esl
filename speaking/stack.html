@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Deck</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="stack-mode">
+
+    <div class="container">
+        <a href="menu.html" class="back-link">← Back to Menu</a>
+
+        <h1 id="deck-title">Loading...</h1>
+
+        <div class="card-display">
+            <p id="question-text">Tap below to start</p>
+        </div>
+
+        <button id="draw-btn" class="main-action-btn">Next Question</button>
+
+        <div class="list-view-container">
+            <button id="toggle-list" class="secondary-btn">Show Full List</button>
+            <ul id="full-list" class="hidden"></ul>
+        </div>
+    </div>
+
+    <script>
+        let questions = [];
+        let lastIndex = -1;
+
+        // 1. Get the deck filename from URL
+        const params = new URLSearchParams(window.location.search);
+        const deckFile = params.get('deck');
+
+        async function init() {
+            if (!deckFile) return;
+
+            try {
+                const response = await fetch(deckFile);
+                if (!response.ok) throw new Error("File not found");
+                const text = await response.text();
+                parseMarkdown(text);
+            } catch (err) {
+                document.getElementById('deck-title').innerText = "Error loading deck";
+                console.error(err);
+            }
+        }
+
+        // 2. Parse Title (#) and List (-)
+        function parseMarkdown(text) {
+            const lines = text.split('\n');
+            const listEl = document.getElementById('full-list');
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                
+                // Check for H1 Title
+                if (trimmed.startsWith('# ')) {
+                    document.getElementById('deck-title').innerText = trimmed.substring(2);
+                } 
+                // Check for List Items
+                else if (trimmed.startsWith('- ')) {
+                    const q = trimmed.substring(2);
+                    questions.push(q);
+
+                    // Add to the scrollable list immediately
+                    const li = document.createElement('li');
+                    li.innerText = q;
+                    listEl.appendChild(li);
+                }
+            });
+        }
+
+        // 3. Random Logic (No Repeats)
+        function drawQuestion() {
+            if (questions.length === 0) return;
+
+            // Simple logic: if only 1 item, just show it. 
+            if (questions.length === 1) {
+                document.getElementById('question-text').innerText = questions[0];
+                return;
+            }
+
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * questions.length);
+            } while (newIndex === lastIndex); // Prevent same index twice in a row
+
+            lastIndex = newIndex;
+            
+            // Vibes: Add a tiny fade effect? For now, just swap text.
+            document.getElementById('question-text').innerText = questions[newIndex];
+        }
+
+        // 4. Toggle List View
+        document.getElementById('toggle-list').addEventListener('click', () => {
+            const list = document.getElementById('full-list');
+            list.classList.toggle('hidden');
+            const btn = document.getElementById('toggle-list');
+            btn.innerText = list.classList.contains('hidden') ? "Show Full List" : "Hide List";
+        });
+
+        document.getElementById('draw-btn').addEventListener('click', drawQuestion);
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
