@@ -1,0 +1,17 @@
+# Second Conditional
+- If you could go on vacation anywhere in the world, where would you go and why?
+- If you could be an expert in one thing, what would it be?
+- What would you do if you could control the weather?
+- If you could meet any historical figure, who would it be and what would you ask them?
+- What would you do if you were offered your dream job, but you had to move to another country to do it?
+- What would you do if you woke up one day and everyone had disappeared?
+- If you could have any superpower, what would it be and how would you use it?
+- If you could be any fictional character, who would you be and why?
+- What would you do if you were the leader of your country for a day?
+- If it were possible to change your appearance instantly, would you change anything about yourself?
+- If you could have a conversation with your past self, what advice would you give yourself?
+- If you could have any type of pet, what would you choose and why?
+- What would you do if you could solve one world problem overnight?
+- If you could switch lives with someone for a day, who would you choose and why?
+- What would happen if all social media platforms were suddenly shut down?
+- What would happen if all forms of mechanical transportation disappeared overnight?
