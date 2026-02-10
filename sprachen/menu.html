@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lehrer-Deck</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Klassenraumdecks</h1>
+            <p>Wählen Sie ein Thema zum Einstieg aus.</p>
+        </header>
+    
+        <div class="search-wrapper">
+            <input type="text" id="search-box" placeholder="Suchthemen..." autocomplete="off">
+        </div>
+        
+        <div id="menu-list" class="button-grid">
+            </div>
+    </div>
+
+    <script>
+        async function loadMenu() {
+            const container = document.getElementById('menu-list');
+            
+            try {
+                // 1. Try to fetch the file
+                const response = await fetch('menu.txt');
+                
+                // 2. Check if the file actually exists
+                if (!response.ok) {
+                    throw new Error(`Could not find menu.txt (Status: ${response.status})`);
+                }
+
+                const text = await response.text();
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+
+                // 3. Check if the file is empty
+                if (lines.length === 0) {
+                    container.innerHTML = '<p style="color:red">menu.txt is empty!</p>';
+                    return;
+                }
+
+                // 4. Generate Buttons
+                lines.forEach(line => {
+                    // Check if the line has the pipe separator |
+                    if (!line.includes('|')) return;
+
+                    const [file, label] = line.split('|').map(s => s.trim());
+                    
+                    if (file && label) {
+                        const btn = document.createElement('a');
+                        btn.className = 'menu-btn';
+                        btn.innerText = label;
+                        btn.href = `stack.html?deck=${encodeURIComponent(file)}`;
+                        
+                        // --- THE MISSING LINE WAS HERE ---
+                        // We must save the label in lowercase so the search bar can find it
+                        btn.setAttribute('data-search', label.toLowerCase());
+                        
+                        container.appendChild(btn);
+                    }
+                });
+
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = `
+                    <div style="padding: 20px; background: #ffebee; color: #c62828; border-radius: 8px;">
+                        <strong>Error:</strong> Buttons couldn't load.<br><br>
+                        <em>Tech details: ${e.message}</em><br><br>
+                        <strong>Fix:</strong> If you are opening this file directly (file://), 
+                        you must use a Local Server (like VS Code Live Server) 
+                        or upload it online.
+                    </div>
+                `;
+            }
+        }
+
+        // Search Logic
+        const searchInput = document.getElementById('search-box');
+        
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const buttons = document.querySelectorAll('.menu-btn');
+
+            buttons.forEach(btn => {
+                // --- SAFETY FIX HERE ---
+                // We add " || '' " so it never returns null, effectively preventing the crash.
+                const text = btn.getAttribute('data-search') || '';
+                
+                if (text.includes(searchTerm)) {
+                    btn.style.display = 'block';
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+        });
+
+        loadMenu();
+    </script>
+</body>
+</html>

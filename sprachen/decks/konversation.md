@@ -1,0 +1,16 @@
+# A2 Deutsch Konversation
+- Was machst du normalerweise direkt nach der Schule?
+- Welches Schulfach magst du am meisten und welches gar nicht?
+- Wie viel Zeit verbringst du jeden Tag am Handy oder am Computer?
+- Was ist deine Lieblings-App und warum benutzt du sie so oft?
+- Gehst du lieber ins Kino oder schaust du Filme zu Hause auf Netflix?
+- Was ist dein aktuelles Lieblingslied und wer ist dein Lieblingskünstler?
+- Was hast du am letzten Wochenende mit deinen Freunden unternommen?
+- Wie sieht dein Style aus? Welche Kleidung trägst du am liebsten?
+- Spielst du Videospiele? Wenn ja, welche magst du am meisten?
+- Was möchtest du nach der Schule machen: studieren oder eine Ausbildung beginnen?
+- Welchen Sport findest du am interessantesten, egal ob du ihn selbst machst oder nur anschaust?
+- Wie feierst du normalerweise deinen Geburtstag mit deinen Freunden?
+- Wohin würdest du gerne reisen, wenn du alleine entscheiden könntest?
+- Hast du ein Vorbild oder jemanden, den du bewunderst?
+- Was ist wichtiger: viele Follower in den sozialen Medien oder ein paar sehr gute Freunde im echten Leben?
