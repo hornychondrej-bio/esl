@@ -1,0 +1,17 @@
+# Passive Voice
+- How often is your room cleaned?
+- When was the last time you were given a gift?
+- Are teenagers trusted by adults in your society?
+- What kind of food is served in your school cafeteria?
+- Has your phone ever been stolen?
+- What meaningful advice were you given by your parents?
+- How much money is spent on fashion by teenagers?
+- What will be done to stop climate change in the future?
+- Are you ever annoyed by your siblings?
+- What is usually eaten for breakfast in your culture?
+- Have you ever been bitten by a dog?
+- What subjects are taught at your school?
+- Will electric cars be driven by everyone in 20 years?
+- Were you punished for something you didn't do as a child?
+- How is Halloween celebrated in your country?
+- What kind of music is listened to by your friends?

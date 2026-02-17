@@ -1,0 +1,20 @@
+# First Conditional
+- If it rains this weekend, what will you do instead of going out?
+- What will you buy if you save enough money by the end of the year?
+- What will you cook if you have to make dinner for your family tonight?
+- What will you do if you wake up late for school tomorrow?
+- If the internet goes down for the next 24 hours, how will you spend your time?
+- What will you wear if the weather is really hot tomorrow?
+- If you become famous, will you change your lifestyle?
+- If you start a new hobby, what will it be?
+- Who will you call if you are in an emergency?
+- What will happen if you don't clean your room?
+- If you learn a new language, which one will you choose?
+- If you see someone bullying a classmate, what will you do?
+- If you win a sports competition, how will you celebrate?
+- If you have a free afternoon, will you read a book or play video games?
+- What will happen if we don't protect the environment?
+- If you get a part-time job, what will you do with the money?
+- If you stay up all night, how will you feel the next morning?
+- What will you say if someone asks for your advice on fashion?
+- What will you do if you break your phone screen?

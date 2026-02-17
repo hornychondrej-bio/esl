@@ -1,0 +1,16 @@
+# Third Conditional
+- If you had been born in the USA, how would your life have been different?
+- Would you have been happier if you had lived 100 years ago?
+- What would you have bought if you had found 2000 CZK yesterday?
+- If you had woken up an hour earlier today, what would you have done differently?
+- What hobby would you have started if you had had more time last year?
+- If you had learned to play an instrument young, which one would it have been?
+- What would you have done if you had forgotten your homework at home?
+- If you had known English perfectly 5 years ago, how would it have helped?
+- If you had visited Paris last year, what would you have seen?
+- What would you have done if the internet had stopped working yesterday?
+- If you had met your idol yesterday, what would you have asked them?
+- How would history have changed if the internet had never been invented?
+- If you had grown up with four more siblings, how would things have been different for all of you?
+- How would you have spent your last week if school had been closed?
+- What would you have done differently five years ago If you had known what you know today? 

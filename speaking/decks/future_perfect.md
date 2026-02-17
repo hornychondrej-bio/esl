@@ -1,0 +1,18 @@
+# Future Perfect
+- By the time you are 25, will you have finished university?
+- What will you have achieved by the end of this year?
+- Will humans have landed on Mars by 2050?
+- By next summer, how much money will you have saved?
+- By the year 2030, will electric cars have replaced gas cars?
+- Will you have married by the time you turn 35?
+- Will scientists have found a cure for cancer by 2040?
+- What new skills will you have mastered in five years?
+- By the time you wake up tomorrow, how many hours will you have slept?
+- Will you have bought your own house by the time you are 40?
+- By the end of the day, how many messages will you have sent?
+- By the time you retire, will you have traveled the world?
+- Will you have started your own business by the time you are 30?
+- What bad habits will you have stopped by next year?
+- How many movies will you have seen by the end of the year?
+- Will you have become fluent in a third language by age 25?
+- By the time you are 50, will you have written a book?
