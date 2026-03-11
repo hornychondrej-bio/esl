@@ -1,0 +1,13 @@
+# Shopping list (where can you get those?)
+- A dozen locally-laid eggs and a kilo of Maris Piper potatoes.  
+- Two thick-cut ribeye steaks and some marrow bones for the dog.  
+- Two fillets of wild-caught sea bass and a pint of fresh prawns.  
+- A loaf of crusty sourdough and half a dozen fruit scones.  
+- A jar of imported Kalamata olives and some hand-sliced pancetta.  
+- A box of assorted pralines and some sugar-free peppermint drops.  
+- A seasonal centerpiece to decorate the dining table for the dinner party.  
+- A multi-pack of high-thread-count envelopes and a new ink refill.  
+- A tube of antiseptic cream and a box of hypoallergenic plasters.  
+- A two-kilo bag of wild bird seed and a set of replacement washers for a leaky tap.  
+- A Sunday broadsheet newspaper and the latest issue of a monthly travel magazine.  
+- A bottle of aged single-malt scotch to give as a retirement gift.
