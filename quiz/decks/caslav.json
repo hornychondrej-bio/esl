@@ -28,7 +28,7 @@
     "question": "Who is credited with founding the royal town of Čáslav around 1264?",
     "options": [
       "Jan Žižka of Trocnov",
-      "King Ottokar II",
+      "Ottokar II",
       "Charles IV",
       "Wenceslaus II"
     ],
@@ -102,7 +102,7 @@
       "1421 and 1424",
       "1639 and 1643",
       "1618 and 1648",
-      "1522 and 1639"
+      "1622 and 1639"
     ],
     "answer": "1639 and 1643",
     "explanation": "The text notes that Swedish troops devastated and burnt down the town twice, in 1639 and 1643."
@@ -113,7 +113,7 @@
     "options": [
       "Kosmos",
       "Zenit Čáslav",
-      "Agrofer",
+      "Agrofert",
       "Čáslavská chemická"
     ],
     "answer": "Zenit Čáslav",
@@ -136,9 +136,9 @@
     "question": "Where is the military air base that supports NATO forces located?",
     "options": [
       "Žehušice",
-      "Chotusice",
+      "Kačina",
       "Žleby",
-      "Hrádek"
+      "Chotusice"
     ],
     "answer": "Chotusice",
     "explanation": "The military airport was built in the nearby village of Chotusice."
@@ -172,11 +172,11 @@
     "question": "What is unique about the Regional Museum in Čáslav?",
     "options": [
       "It is the oldest stone building in town",
-      "It is the second oldest museum in the country",
+      "It is built in the Neo-Gothic style",
       "It was the site of the 1421 assembly",
-      "It is built in the Neo-Gothic style"
+      "It is the second oldest museum in the country"
     ],
-    "answer": "It is the second oldest museum in the Czech Republic",
+    "answer": "It is the second oldest museum in the country",
     "explanation": "The Regional Museum is the second oldest in the country, after the National Museum in Prague."
   },
   {
@@ -196,8 +196,8 @@
     "question": "Which Čáslav native became world-famous for his contributions to stage and theatre design?",
     "options": [
       "Kliment Čermák",
-      "Josef Svoboda",
       "Rudolf Těsnohlídek",
+      "Josef Svoboda",
       "Ladislav Quis"
     ],
     "answer": "Josef Svoboda",
