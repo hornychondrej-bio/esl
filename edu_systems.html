@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Where Would You Like to Go to School? (2026 Update)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- PALETTE: Vibrant Cyan & Deep Blue (Cyan #06B6D4, Blue #1E3A8A, Amber #F59E0B, Slate #F8FAFC) -->
+    <!-- PLAN SUMMARY: Section 1: Intro (Hook). Section 2: Educational Timelines (Horizontal Bar chart comparing duration of schooling phases). Section 3: High School & Exams (Cards/HTML showing SAT vs A-Levels vs Maturita). Section 4: Higher Education & Costs (Bar chart for degree durations, large stats for tuition). Section 5: Glossary & Terminology (HTML tables for BrE vs AmE). -->
+    <!-- VISUALIZATION CHOICES: 1. Education Phases -> Goal: Compare -> Chosen: Chart.js Stacked Horizontal Bar. Justification: Best for comparing durations across categories. Confirming NO SVG. 2. Higher Ed Duration -> Goal: Compare -> Chosen: Chart.js Grouped Bar. Justification: Allows direct side-by-side comparison of degree lengths. Confirming NO SVG. 3. Final Exams/Costs -> Goal: Organize/Inform -> Chosen: Tailwind CSS Styled Cards & Big Numbers with Unicode. Justification: Text-heavy categorical data needs clean typography, not a chart. Confirming NO SVG. -->
+    <!-- CONFIRMATION: I explicitly confirm that NEITHER Mermaid JS NOR SVG were used anywhere in the output. -->
+
+    <nav class="sticky top-0 z-50 bg-[#1E3A8A] text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center font-bold text-xl tracking-wider">
+                    <span class="mr-2 text-2xl">🌍</span> EDU-COMPARE 2026
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#journey" class="hover:bg-[#06B6D4] px-3 py-2 rounded-md text-sm font-medium transition-colors">The Journey</a>
+                        <a href="#assessments" class="hover:bg-[#06B6D4] px-3 py-2 rounded-md text-sm font-medium transition-colors">Assessments</a>
+                        <a href="#higher-ed" class="hover:bg-[#06B6D4] px-3 py-2 rounded-md text-sm font-medium transition-colors">Higher Ed</a>
+                        <a href="#linguistics" class="hover:bg-[#06B6D4] px-3 py-2 rounded-md text-sm font-medium transition-colors">Linguistics</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="bg-[#1E3A8A] text-white py-20 px-4 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Where Would You Like to Go to School?</h1>
+        <p class="text-xl md:text-2xl font-light max-w-3xl mx-auto text-cyan-100">
+            A 2026 comparative analysis of education systems in the United States, Great Britain, and the Czech Republic.
+        </p>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="journey" class="mb-20">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-[#1E3A8A] mb-4">The Educational Journey</h2>
+                <div class="w-24 h-1 bg-[#06B6D4] mx-auto mb-6"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto text-lg">
+                    While children in all three countries begin their compulsory education around age five or six, the structure and duration of primary and secondary schooling vary significantly. The chart below illustrates the typical duration in years for each phase of schooling leading up to higher education.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-10 border border-gray-100">
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Duration of Compulsory & Secondary Education</h3>
+                    <p class="text-sm text-gray-500">Comparing the years spent in primary vs. secondary/high school environments before university.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="educationTimelineChart"></canvas>
+                </div>
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600">
+                        <h4 class="font-bold text-[#1E3A8A] text-lg mb-1">🇺🇸 United States</h4>
+                        <p class="text-sm text-gray-700">Follows a typical 5-3-4 structure: 5 years elementary, 3 years middle school, and 4 years high school (freshmen to seniors).</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-cyan-500">
+                        <h4 class="font-bold text-[#1E3A8A] text-lg mb-1">🇬🇧 Great Britain</h4>
+                        <p class="text-sm text-gray-700">Divided into primary (infant/junior) up to age 11, followed by secondary school and optional Sixth Form (Years 12-13).</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-amber-500">
+                        <h4 class="font-bold text-[#1E3A8A] text-lg mb-1">🇨🇿 Czech Republic</h4>
+                        <p class="text-sm text-gray-700">Features a distinct 9-year unified elementary school (*základní škola*), followed by 4 years of secondary/grammar school.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="assessments" class="mb-20">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-[#1E3A8A] mb-4">Assessing Success: Exams & Grading</h2>
+                <div class="w-24 h-1 bg-[#F59E0B] mx-auto mb-6"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto text-lg">
+                    How is a student's knowledge measured? From daily grading systems to the final high-stakes exams that determine university placement, each nation has its own approach to academic assessment.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="bg-white rounded-xl shadow-lg p-8 border-t-8 border-blue-600 relative overflow-hidden group hover:shadow-xl transition-shadow">
+                    <div class="absolute -right-6 -top-6 text-9xl opacity-5 group-hover:opacity-10 transition-opacity">💻</div>
+                    <h3 class="text-2xl font-bold text-[#1E3A8A] mb-4 flex items-center">
+                        <span class="text-3xl mr-3">🇺🇸</span> United States
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <span class="uppercase text-xs font-bold text-gray-400 tracking-wider">Grading System</span>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <span class="bg-green-100 text-green-800 font-bold px-3 py-1 rounded-full text-sm">A</span>
+                                <span class="text-gray-400">to</span>
+                                <span class="bg-red-100 text-red-800 font-bold px-3 py-1 rounded-full text-sm">F</span>
+                                <span class="text-xs text-gray-500 ml-2">(No 'E' grade)</span>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-gray-100">
+                            <span class="uppercase text-xs font-bold text-gray-400 tracking-wider">Final Assessments</span>
+                            <h4 class="text-lg font-bold text-gray-800 mt-1">Digital SAT & ACT</h4>
+                            <p class="text-sm text-gray-600 mt-2">Taken in junior year. As of 2026, the SAT is a fully digital, adaptive test taken on laptops/tablets. High school testing relies heavily on quizzes and projects rather than oral exams.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-8 border-t-8 border-cyan-500 relative overflow-hidden group hover:shadow-xl transition-shadow">
+                    <div class="absolute -right-6 -top-6 text-9xl opacity-5 group-hover:opacity-10 transition-opacity">📝</div>
+                    <h3 class="text-2xl font-bold text-[#1E3A8A] mb-4 flex items-center">
+                        <span class="text-3xl mr-3">🇬🇧</span> Great Britain
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <span class="uppercase text-xs font-bold text-gray-400 tracking-wider">Grading System</span>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <span class="bg-green-100 text-green-800 font-bold px-3 py-1 rounded-full text-sm">A*</span>
+                                <span class="text-gray-400">to</span>
+                                <span class="bg-red-100 text-red-800 font-bold px-3 py-1 rounded-full text-sm">U</span>
+                                <span class="text-xs text-gray-500 ml-2">(U = Unclassified/Fail)</span>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-gray-100">
+                            <span class="uppercase text-xs font-bold text-gray-400 tracking-wider">Final Assessments</span>
+                            <h4 class="text-lg font-bold text-gray-800 mt-1">GCSEs & A-Levels</h4>
+                            <p class="text-sm text-gray-600 mt-2">GCSEs taken at 16. A-Levels (3-4 subjects) taken at 18. AS-Levels are now decoupled. Vocational options include the new T-Levels.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-8 border-t-8 border-amber-500 relative overflow-hidden group hover:shadow-xl transition-shadow">
+                    <div class="absolute -right-6 -top-6 text-9xl opacity-5 group-hover:opacity-10 transition-opacity">🗣️</div>
+                    <h3 class="text-2xl font-bold text-[#1E3A8A] mb-4 flex items-center">
+                        <span class="text-3xl mr-3">🇨🇿</span> Czech Republic
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <span class="uppercase text-xs font-bold text-gray-400 tracking-wider">Grading System</span>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <span class="bg-green-100 text-green-800 font-bold px-3 py-1 rounded-full text-sm">1</span>
+                                <span class="text-gray-400">to</span>
+                                <span class="bg-red-100 text-red-800 font-bold px-3 py-1 rounded-full text-sm">5</span>
+                                <span class="text-xs text-gray-500 ml-2">(1 is Excellent)</span>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-gray-100">
+                            <span class="uppercase text-xs font-bold text-gray-400 tracking-wider">Final Assessments</span>
+                            <h4 class="text-lg font-bold text-gray-800 mt-1">Maturita</h4>
+                            <p class="text-sm text-gray-600 mt-2">Final school-leaving exam in the 4th year of secondary school. As of 2025/2026, includes the "Complex Profile Work" (a project/thesis) as a modern alternative. Oral exams are common.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="higher-ed" class="mb-20">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-[#1E3A8A] mb-4">Higher Education: Time & Money</h2>
+                <div class="w-24 h-1 bg-[#06B6D4] mx-auto mb-6"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto text-lg">
+                    Pursuing a university degree requires a significant investment of both time and money. Here is a breakdown of the standard degree durations and the current financial landscapes for students.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 text-center">Standard Degree Duration (Years)</h3>
+                    <div class="chart-container">
+                        <canvas id="degreeDurationChart"></canvas>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-6 text-center italic">Note: PhD programs vary widely and are not included in standard baseline calculations. UK Bachelor degrees are typically 4 years in Scotland.</p>
+                </div>
+
+                <div class="flex flex-col gap-6">
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-700 rounded-xl shadow-lg p-8 text-white flex-1 flex flex-col justify-center">
+                        <h3 class="text-2xl font-bold mb-2 flex items-center"><span class="text-3xl mr-3">🎓</span> Tuition Reality Check</h3>
+                        <p class="text-blue-100 mb-6">How much does higher education cost in 2026?</p>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm border border-white/20">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-lg">🇺🇸 United States</span>
+                                    <span class="text-amber-400 font-bold text-xl">High / Variable</span>
+                                </div>
+                                <p class="text-sm text-blue-100 mt-2">Costs vary drastically between community colleges, state universities, and private Ivy League schools.</p>
+                            </div>
+
+                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm border border-white/20">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-lg">🇬🇧 England (UK)</span>
+                                    <span class="text-cyan-300 font-bold text-xl">£9,790 / year</span>
+                                </div>
+                                <p class="text-sm text-blue-100 mt-2">Capped via government loans. Repayment only begins once a graduate earns over £25,000 annually.</p>
+                            </div>
+
+                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm border border-white/20">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-lg">🇨🇿 Czech Republic</span>
+                                    <span class="text-green-400 font-bold text-xl">Free</span>
+                                </div>
+                                <p class="text-sm text-blue-100 mt-2">State university education is entirely free of charge for students studying in the Czech language.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="linguistics" class="mb-10">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-[#1E3A8A] px-8 py-6">
+                    <h2 class="text-2xl font-bold text-white flex items-center">
+                        <span class="text-3xl mr-3">📚</span> Terminology: BrE vs. AmE
+                    </h2>
+                    <p class="text-cyan-100 mt-2">Key linguistic differences in educational vocabulary across the pond.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+                    <div class="p-8 bg-gray-50">
+                        <h3 class="font-bold text-lg text-gray-800 mb-4 text-center border-b pb-2">🇬🇧 British English</h3>
+                        <ul class="space-y-4">
+                            <li class="flex justify-between items-center bg-white p-3 rounded shadow-sm">
+                                <span class="font-medium text-[#1E3A8A]">Marks</span>
+                                <span class="text-xl">✏️</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-white p-3 rounded shadow-sm">
+                                <span class="font-medium text-[#1E3A8A]">Maths</span>
+                                <span class="text-xl">➗</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-white p-3 rounded shadow-sm">
+                                <span class="font-medium text-[#1E3A8A]">Secondary School</span>
+                                <span class="text-xl">🏫</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-white p-3 rounded shadow-sm">
+                                <span class="font-medium text-[#1E3A8A]">University</span>
+                                <span class="text-xl">🎓</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="p-8 bg-white">
+                        <h3 class="font-bold text-lg text-gray-800 mb-4 text-center border-b pb-2">🇺🇸 American English</h3>
+                        <ul class="space-y-4">
+                            <li class="flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-100">
+                                <span class="text-xl">✏️</span>
+                                <span class="font-medium text-[#06B6D4]">Grades</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-100">
+                                <span class="text-xl">➗</span>
+                                <span class="font-medium text-[#06B6D4]">Math</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-100">
+                                <span class="text-xl">🏫</span>
+                                <span class="font-medium text-[#06B6D4]">High School</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-100">
+                                <span class="text-xl">🎓</span>
+                                <span class="font-medium text-[#06B6D4]">College</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-gray-300 py-10 text-center">
+        <div class="max-w-4xl mx-auto px-4">
+            <h4 class="text-white font-bold text-xl mb-4">Glossary of Terms</h4>
+            <div class="flex flex-wrap justify-center gap-2 text-sm mb-6">
+                <span class="bg-gray-700 px-3 py-1 rounded"><strong>Critical Thinking:</strong> Analyzing, synthesizing, and evaluating ideas.</span>
+                <span class="bg-gray-700 px-3 py-1 rounded"><strong>Alma Mater:</strong> The school or university you attended.</span>
+                <span class="bg-gray-700 px-3 py-1 rounded"><strong>Undergraduate:</strong> Bachelor's level of education.</span>
+                <span class="bg-gray-700 px-3 py-1 rounded"><strong>Compulsory:</strong> Mandatory by law (Povinný).</span>
+            </div>
+            <p class="text-xs text-gray-500">Based on the 2026 Comparative Education Systems Update. Designed for clarity and insight.</p>
+        </div>
+    </footer>
+
+    <script>
+        const wrapLabel = (label) => {
+            if (label.length <= 16) return label;
+            const words = label.split(' ');
+            let lines = [];
+            let currentLine = '';
+            
+            words.forEach(word => {
+                if ((currentLine + word).length > 16) {
+                    if (currentLine.trim() !== '') {
+                        lines.push(currentLine.trim());
+                    }
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            });
+            if (currentLine.trim() !== '') {
+                lines.push(currentLine.trim());
+            }
+            return lines;
+        };
+
+        const timelineLabels = [
+            wrapLabel("United States"),
+            wrapLabel("Great Britain"),
+            wrapLabel("Czech Republic")
+        ];
+
+        const ctxTimeline = document.getElementById('educationTimelineChart').getContext('2d');
+        new Chart(ctxTimeline, {
+            type: 'bar',
+            data: {
+                labels: timelineLabels,
+                datasets: [
+                    {
+                        label: 'Primary/Elementary Years',
+                        data: [6, 6, 9],
+                        backgroundColor: '#06B6D4',
+                        borderWidth: 0,
+                        barPercentage: 0.6
+                    },
+                    {
+                        label: 'Secondary/High School Years',
+                        data: [7, 7, 4],
+                        backgroundColor: '#1E3A8A',
+                        borderWidth: 0,
+                        barPercentage: 0.6
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: 'Roboto', size: 13 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                    return label.join(' ');
+                                } else {
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Years in School (Approx.)',
+                            font: { family: 'Roboto', weight: 'bold' }
+                        },
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: { font: { family: 'Roboto', weight: 'bold' } }
+                    }
+                }
+            }
+        });
+
+        const degreeLabels = [
+            wrapLabel("United States"),
+            wrapLabel("Great Britain"),
+            wrapLabel("Czech Republic")
+        ];
+
+        const ctxDegree = document.getElementById('degreeDurationChart').getContext('2d');
+        new Chart(ctxDegree, {
+            type: 'bar',
+            data: {
+                labels: degreeLabels,
+                datasets: [
+                    {
+                        label: "Bachelor's Degree",
+                        data: [4, 3, 3],
+                        backgroundColor: '#1E3A8A',
+                        borderRadius: 4
+                    },
+                    {
+                        label: "Master's Degree (Additional)",
+                        data: [2, 1, 2],
+                        backgroundColor: '#F59E0B',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: 'Roboto', size: 13 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                    return label.join(' ');
+                                } else {
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Duration in Years',
+                            font: { family: 'Roboto', weight: 'bold' }
+                        },
+                        grid: {
+                            color: '#e2e8f0',
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Roboto', weight: 'bold' } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
