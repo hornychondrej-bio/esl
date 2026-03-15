@@ -1,0 +1,242 @@
+[
+  {
+    "id": 1,
+    "question": "In which geographical direction from Čáslav would you find the Iron Mountains?",
+    "options": [
+      "Southwest",
+      "Northeast",
+      "Southeast",
+      "Northwest"
+    ],
+    "answer": "Northeast",
+    "explanation": "The text states that the town is surrounded by the Iron Mountains in the northeast."
+  },
+  {
+    "id": 2,
+    "question": "What was the name of the original settlement founded after 800 AD?",
+    "options": [
+      "Trocnov",
+      "Chotusice",
+      "Hrádek",
+      "Vodranty"
+    ],
+    "answer": "Hrádek",
+    "explanation": "The history of Čáslav began with a citadel and settlement named Hrádek."
+  },
+  {
+    "id": 3,
+    "question": "Who is credited with founding the royal town of Čáslav around 1264?",
+    "options": [
+      "Jan Žižka of Trocnov",
+      "King Ottokar II",
+      "Charles IV",
+      "Wenceslaus II"
+    ],
+    "answer": "Ottokar II",
+    "explanation": "King Ottokar II (Přemysl Otakar II) from the Přemyslid dynasty founded the royal town in the 13th century."
+  },
+  {
+    "id": 4,
+    "question": "How high is the tower of the Church of Saints Peter and Paul?",
+    "options": [
+      "80 metres",
+      "88 metres",
+      "92 metres",
+      "126 metres"
+    ],
+    "answer": "88 metres",
+    "explanation": "The church tower is 88 metres high, making it the third highest church tower in the Czech Republic."
+  },
+  {
+    "id": 5,
+    "question": "Which architectural style is NOT mentioned as part of the Church of Saints Peter and Paul?",
+    "options": [
+      "Romanesque",
+      "Neo-Gothic",
+      "Baroque",
+      "Gothic"
+    ],
+    "answer": "Baroque",
+    "explanation": "While the town has Baroque buildings, the church specifically features styles ranging from Romanesque to Neo-Gothic."
+  },
+  {
+    "id": 6,
+    "question": "Where were the skeletal remains of Jan Žižka discovered?",
+    "options": [
+      "Beneath the Ottokar Tower",
+      "In the Regional Museum",
+      "In the Church of Saints Peter and Paul",
+      "In the Hrádek citadel"
+    ],
+    "answer": "In the Church of Saints Peter and Paul",
+    "explanation": "Jan Žižka's skull and bones were found during the reconstruction of the SS. Peter and Paul's Church."
+  },
+  {
+    "id": 7,
+    "question": "What significant event took place in Čáslav in June 1421?",
+    "options": [
+      "The founding of the Ottokar Tower",
+      "The Čáslav assembly to vote for a new government",
+      "A devastating fire that destroyed the town",
+      "The discovery of Jan Žižka's remains"
+    ],
+    "answer": "The Čáslav assembly to vote for a new government",
+    "explanation": "The Bohemian parliament met in Čáslav in 1421 to vote for a new Hussite government."
+  },
+  {
+    "id": 8,
+    "question": "Why did the fire of 1522 have such a devastating impact on the town?",
+    "options": [
+      "The fortification walls had collapsed",
+      "Most houses were constructed from wood",
+      "The town was under siege by Swedish troops",
+      "The church tower acted as a chimney"
+    ],
+    "answer": "Most houses were constructed from wood",
+    "explanation": "The fire destroyed almost the whole town because the majority of the houses were made of wood."
+  },
+  {
+    "id": 9,
+    "question": "Which set of years reflects the Swedish devastations during the Thirty Years' War?",
+    "options": [
+      "1421 and 1424",
+      "1639 and 1643",
+      "1618 and 1648",
+      "1522 and 1639"
+    ],
+    "answer": "1639 and 1643",
+    "explanation": "The text notes that Swedish troops devastated and burnt down the town twice, in 1639 and 1643."
+  },
+  {
+    "id": 10,
+    "question": "What is the name of the famous local enterprise currently producing detergents?",
+    "options": [
+      "Kosmos",
+      "Zenit Čáslav",
+      "Agrofer",
+      "Čáslavská chemická"
+    ],
+    "answer": "Zenit Čáslav",
+    "explanation": "Zenit Čáslav (formerly Kosmos) is the enterprise that produces detergents."
+  },
+  {
+    "id": 11,
+    "question": "When did Čáslav lose its status as a district town?",
+    "options": [
+      "Beginning of the 1950s",
+      "Early 2003",
+      "Beginning of the 1960s",
+      "Late 19th century"
+    ],
+    "answer": "Beginning of the 1960s",
+    "explanation": "The article states the town lost its district status in the beginning of the 1960s."
+  },
+  {
+    "id": 12,
+    "question": "Where is the military air base that supports NATO forces located?",
+    "options": [
+      "Žehušice",
+      "Chotusice",
+      "Žleby",
+      "Hrádek"
+    ],
+    "answer": "Chotusice",
+    "explanation": "The military airport was built in the nearby village of Chotusice."
+  },
+  {
+    "id": 13,
+    "question": "Jan Ladislav Dusík, after whom the local theatre is named, was a:",
+    "options": [
+      "Pianist and composer",
+      "Poet and writer",
+      "Botanist",
+      "Archaeologist"
+    ],
+    "answer": "Pianist and composer",
+    "explanation": "Jan Ladislav Dusík was a pianist and composer."
+  },
+  {
+    "id": 14,
+    "question": "Which famous athlete, a world record holder in the 800m, trained in Čáslav?",
+    "options": [
+      "Ludmila Formanová",
+      "Jarmila Kratochvílová",
+      "Dana Zátopková",
+      "Barbora Špotáková"
+    ],
+    "answer": "Jarmila Kratochvílová",
+    "explanation": "Jarmila Kratochvílová is the 800m world record holder who trained in Čáslav's Vodranty park."
+  },
+  {
+    "id": 15,
+    "question": "What is unique about the Regional Museum in Čáslav?",
+    "options": [
+      "It is the oldest stone building in town",
+      "It is the second oldest museum in the country",
+      "It was the site of the 1421 assembly",
+      "It is built in the Neo-Gothic style"
+    ],
+    "answer": "It is the second oldest museum in the Czech Republic",
+    "explanation": "The Regional Museum is the second oldest in the country, after the National Museum in Prague."
+  },
+  {
+    "id": 16,
+    "question": "What is the Dusík Theatre's historical distinction?",
+    "options": [
+      "It is the oldest stone theatre in Eastern Bohemia",
+      "It was originally part of the royal fortification",
+      "It is the only Neo-Classical theatre in the region",
+      "It was founded by the town's Jewish community"
+    ],
+    "answer": "It is the oldest stone theatre in Eastern Bohemia",
+    "explanation": "The Neo-Romanesque Dusík Theatre is the oldest stone theatre in Eastern Bohemia."
+  },
+  {
+    "id": 17,
+    "question": "Which Čáslav native became world-famous for his contributions to stage and theatre design?",
+    "options": [
+      "Kliment Čermák",
+      "Josef Svoboda",
+      "Rudolf Těsnohlídek",
+      "Ladislav Quis"
+    ],
+    "answer": "Josef Svoboda",
+    "explanation": "Josef Svoboda was a prominent scenic designer and theatre artist born in Čáslav."
+  },
+  {
+    "id": 18,
+    "question": "Which school was founded in 1880?",
+    "options": [
+      "Secondary School of Agriculture",
+      "Grammar School",
+      "Business College",
+      "Secondary Vocational School"
+    ],
+    "answer": "Grammar School",
+    "explanation": "The Grammar School was founded in 1880."
+  },
+  {
+    "id": 19,
+    "question": "What architectural style was used for the rebuilding of the nearby Žleby castle?",
+    "options": [
+      "English/Tudor Gothic",
+      "Baroque",
+      "Neo-Classical",
+      "Romanesque"
+    ],
+    "answer": "English/Tudor Gothic",
+    "explanation": "Žleby castle was rebuilt in the English/Tudor Gothic style."
+  },
+  {
+    "id": 20,
+    "question": "What is the game preserve at Žehušice famous for?",
+    "options": [
+      "A herd of rare white deer",
+      "Rare forest bison",
+      "A sanctuary for golden eagles",
+      "Wild mouflons"
+    ],
+    "answer": "A herd of rare white deer",
+    "explanation": "Žehušice is famous for its game preserve which contains a herd of rare white deer."
+  }
+]
