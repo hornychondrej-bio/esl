@@ -100,9 +100,9 @@
     "question": "Which set of years reflects the Swedish devastations during the Thirty Years' War?",
     "options": [
       "1421 and 1424",
-      "1639 and 1643",
+      "1622 and 1639",
       "1618 and 1648",
-      "1622 and 1639"
+      "1639 and 1643"
     ],
     "answer": "1639 and 1643",
     "explanation": "The text notes that Swedish troops devastated and burnt down the town twice, in 1639 and 1643."
@@ -111,8 +111,8 @@
     "id": 10,
     "question": "What is the name of the famous local enterprise currently producing detergents?",
     "options": [
-      "Kosmos",
       "Zenit Čáslav",
+      "Kosmos",
       "Agrofert",
       "Čáslavská chemická"
     ],
