@@ -1,0 +1,170 @@
+[
+  {
+    "id": 1,
+    "question": "Které z následujících hormonů jsou sice vylučovány hypofýzou, ale jejich skutečné místo vzniku (produkce) se nachází v hypothalamu?",
+    "options": [
+      "ACTH a thyrotropin",
+      "Růstový hormon a prolaktin",
+      "Oxytocin a vasopresin",
+      "FSH a luteinizační hormon"
+    ],
+    "answer": "Oxytocin a vasopresin",
+    "explanation": "Oxytocin a vasopresin jsou hormony tvořené v hypothalamu a následně vylučované hypofýzou."
+  },
+  {
+    "id": 2,
+    "question": "Jaký konkrétní následek má nedostatek jódu ve stravě u dětí podle přiloženého materiálu?",
+    "options": [
+      "Nadměrná stimulace kůry nadledvinek",
+      "Hypothyroidismus vedoucí k vývojovým poruchám mozku",
+      "Vznik cukrovky 1. typu v důsledku ničení Langerhansových ostrůvků",
+      "Hyperthyroidismus způsobující zrychlený metabolismus"
+    ],
+    "answer": "Hypothyroidismus vedoucí k vývojovým poruchám mozku",
+    "explanation": "Nedostatek jódu vede u dětí k hypothyroidismu, který způsobuje vývojové poruchy mozku."
+  },
+  {
+    "id": 3,
+    "question": "Který hormon je zodpovědný za pocit hladu a kde v těle primárně vzniká?",
+    "options": [
+      "Glukagon ve slinivce břišní",
+      "Ghrelin v žaludku",
+      "Leptin v tukových buňkách",
+      "Gastrin v dvanáctníku"
+    ],
+    "answer": "Ghrelin v žaludku",
+    "explanation": "Ghrelin je tvořen v žaludku a jeho funkcí je nabuzování pocitu hladu."
+  },
+  {
+    "id": 4,
+    "question": "Jaký je hlavní rozdíl v účinku inzulinu a glukagonu na hladinu cukru v krvi?",
+    "options": [
+      "Inzulin i glukagon hladinu cukru zvyšují, ale každý v jiném orgánu",
+      "Inzulin přesouvá cukr z buněk do krve, zatímco glukagon naopak",
+      "Inzulin přesouvá cukr z krve do buněk, zatímco glukagon jej přesouvá z buněk do krve",
+      "Inzulin stimuluje tvorbu glykogenu, zatímco glukagon stimuluje tvorbu tuků"
+    ],
+    "answer": "Inzulin přesouvá cukr z krve do buněk, zatímco glukagon jej přesouvá z buněk do krve",
+    "explanation": "Inzulin přesouvá cukr z krve do buněk a glukagon jej vrací z buněk zpět do krve."
+  },
+  {
+    "id": 5,
+    "question": "Která část nadledvinek produkuje kortizol a jaký je jeho vliv na imunitní systém?",
+    "options": [
+      "Dřeň nadledvinek; kortizol imunitu aktivuje při stresu",
+      "Kůra nadledvinek; kortizol potlačuje imunitu a záněty",
+      "Dřeň nadledvinek; kortizol nemá na imunitu vliv",
+      "Kůra nadledvinek; kortizol stimuluje tvorbu nových bílkovin v imunitních buňkách"
+    ],
+    "answer": "Kůra nadledvinek; kortizol potlačuje imunitu a záněty",
+    "explanation": "Kůra nadledvinek vyrábí glukokortikoidy (hlavně kortizol), který potlačuje imunitu a záněty."
+  },
+  {
+    "id": 6,
+    "question": "Hormon melatonin je produkován šišinkou. Co nejvíce potlačuje jeho přirozenou tvorbu?",
+    "options": [
+      "Nedostatek spánku a stres",
+      "Konzumace potravin s vysokým obsahem jódu",
+      "Modré světlo",
+      "Užívání doplňků stravy pro léčbu pásmové nemoci"
+    ],
+    "answer": "Modré světlo",
+    "explanation": "Tvorbu melatoninu potlačuje modré světlo."
+  },
+  {
+    "id": 7,
+    "question": "Který z následujících hormonů je spojen s tkání kostí a má vliv na svaly a paměť?",
+    "options": [
+      "Erytropoetin",
+      "Osteokalcin",
+      "Kalcitonin",
+      "Parathormon (PTH)"
+    ],
+    "answer": "Osteokalcin",
+    "explanation": "Osteokalcin v kostech podporuje svaly a paměť."
+  },
+  {
+    "id": 8,
+    "question": "Jaký je vztah mezi testosteronem a chováním u mužů podle prezentovaných informací?",
+    "options": [
+      "Vyšší koncentrace vede k větší empatii a péči o děti",
+      "Hladina testosteronu je konstantní a nezávisí na úspěchu či neúspěchu",
+      "Muži s vyšší koncentrací více riskují a bývají agresivnější",
+      "Testosteron nemá na lidské chování žádný prokázaný vliv"
+    ],
+    "answer": "Muži s vyšší koncentrací více riskují a bývají agresivnější",
+    "explanation": "Muži s vyšší koncentrací testosteronu jsou agresivnější, více riskují a více podvádí."
+  },
+  {
+    "id": 9,
+    "question": "Do které kategorie hormonů patří progesteron a ve které fázi menstruačního cyklu hraje hlavní roli?",
+    "options": [
+      "Estrogeny; v 1. polovině cyklu",
+      "Gestageny; v 2. polovině cyklu",
+      "Androgeny; během ovulace",
+      "Gonadotropiny; při tvorbě druhotných pohlavních znaků"
+    ],
+    "answer": "Gestageny; v 2. polovině cyklu",
+    "explanation": "Ženské hormony se dělí na gestageny (hlavně progesteron) související s 2. polovinou cyklu a estrogeny související spíše s 1. polovinou."
+  },
+  {
+    "id": 10,
+    "question": "Jak se nazývá část slinivky břišní, která je zodpovědná za tvorbu hormonů?",
+    "options": [
+      "Peyerovy pláty",
+      "Langerhansovy ostrůvky",
+      "Nadledvinková kůra",
+      "Exokrinní aciny"
+    ],
+    "answer": "Langerhansovy ostrůvky",
+    "explanation": "Část slinivky břišní obsahuje Langerhansovy ostrůvky tvořící hormony."
+  },
+  {
+    "id": 11,
+    "question": "Který hormon stimuluje tvorbu červených krvinek a kde vzniká?",
+    "options": [
+      "Erytropoetin v ledvinách",
+      "Thymopoietin v brzlíku",
+      "Renin v nadledvinkách",
+      "Adrenalin v kostní dřeni"
+    ],
+    "answer": "Erytropoetin v ledvinách",
+    "explanation": "Erytropoetin vzniká v ledvinách a podporuje tvorbu erytrocytů (červených krvinek)."
+  },
+  {
+    "id": 12,
+    "question": "Co je primární funkcí hormonu aldosteronu produkovaného v kůře nadledvinek?",
+    "options": [
+      "Řízení krevního tlaku prostřednictvím stahů svalstva",
+      "Řízení balancu elektrolytů skrze vstřebávání v ledvinách",
+      "Potlačování zánětů v těle",
+      "Podpora růstu svalové hmoty a hustoty kostí"
+    ],
+    "answer": "Řízení balancu elektrolytů skrze vstřebávání v ledvinách",
+    "explanation": "Mineralokortikoidy (např. aldosteron) řídí balanc elektrolytů skrze vstřebávání v ledvinách."
+  },
+  {
+    "id": 13,
+    "question": "Který hormon je v textu označen jako 'mozek endokrinní soustavy', protože řídí ostatní žlázy?",
+    "options": [
+      "Hypothalamus",
+      "Hypofýza",
+      "Šítná žláza",
+      "Nadledvinky"
+    ],
+    "answer": "Hypofýza",
+    "explanation": "Hypofýza je jako 'mozek endokrinní soustavy', který řídí ostatní endokrinní žlázy."
+  },
+  {
+    "id": 14,
+    "question": "Jak se liší složení hormonů štítné žlázy (např. T3) od jiných běžných hormonů?",
+    "options": [
+      "Obsahují jód",
+      "Jsou tvořeny výhradně z cholesterolu",
+      "Jsou to signální molekuly přenášené nervy, nikoliv krví",
+      "Obsahují vysoké množství vápníku pro posílení kostí"
+    ],
+    "answer": "Obsahují jód",
+    "explanation": "Hormony štítné žlázy obsahují jód, a proto se jód přidává do soli."
+  }
+]
