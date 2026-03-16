@@ -13,7 +13,7 @@
   },
   {
     "id": 2,
-    "question": "Jaký konkrétní následek má nedostatek jódu ve stravě u dětí podle přiloženého materiálu?",
+    "question": "Jaký konkrétní následek má nedostatek jódu ve stravě u dětí?",
     "options": [
       "Nadměrná stimulace kůry nadledvinek",
       "Hypothyroidismus vedoucí k vývojovým poruchám mozku",
@@ -85,7 +85,7 @@
   },
   {
     "id": 8,
-    "question": "Jaký je vztah mezi testosteronem a chováním u mužů podle prezentovaných informací?",
+    "question": "Jaký je vztah mezi testosteronem a chováním u mužů?",
     "options": [
       "Vyšší koncentrace vede k větší empatii a péči o děti",
       "Hladina testosteronu je konstantní a nezávisí na úspěchu či neúspěchu",
