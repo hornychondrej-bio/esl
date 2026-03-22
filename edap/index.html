@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdTech Přehrávač Lekcí</title>
+    
+    <!-- Konfigurace Tailwindu -->
+    <script>
+        window.tailwind = {
+            config: {
+                theme: {
+                    extend: {
+                        keyframes: {
+                            shake: { 
+                                '0%, 100%': { transform: 'translateX(0)' }, 
+                                '25%, 75%': { transform: 'translateX(-5px)' }, 
+                                '50%': { transform: 'translateX(5px)' } 
+                            }
+                        },
+                        animation: { shake: 'shake 0.4s ease-in-out' }
+                    }
+                }
+            }
+        };
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .slide-up { animation: slideUp 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .slot-btn { transition: all 0.2s; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: 120px; height: 40px; padding: 0 16px; margin: 0 4px; border-radius: 8px; font-weight: 600; font-size: 14px; border-bottom-width: 4px; }
+        .slot-empty { background: #fff; border-color: #cbd5e1; border-style: dashed; color: #94a3b8; }
+        .slot-empty:hover { background: #f8fafc; }
+        .slot-filled { background: #dbeafe; border-color: #93c5fd; border-style: solid; color: #1e40af; transform: translateY(2px); }
+        .slot-filled:hover { background: #bfdbfe; transform: translateY(0px); }
+        .slot-error { background: #fee2e2; border-color: #fca5a5; border-style: solid; color: #991b1b; }
+        .slot-correct { background: #dcfce7; border-color: #86efac; border-style: solid; color: #166534; cursor: default; pointer-events: none; }
+        
+        #sidebar { transition: transform 0.3s ease-in-out; }
+        .sidebar-open { transform: translateX(0); }
+        .sidebar-closed { transform: translateX(-100%); }
+
+        /* Posuvníky pro Mermaid diagramy */
+        .mermaid-wrapper::-webkit-scrollbar { height: 8px; }
+        .mermaid-wrapper::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .mermaid-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .mermaid-wrapper::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 selection:bg-blue-200 min-h-screen overflow-x-hidden relative">
+
+    <div id="app"></div>
+
+<script>
+const icons = {
+    book: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+    check: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    x: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    arrowRight: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+    arrowLeft: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
+    menu: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
+    home: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+    refresh: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 1 0 2.81-6.5L3 8"/></svg>`,
+    info: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
+};
+
+const shuffleArray = (arr) => arr.map(a => ({sort: Math.random(), value: a})).sort((a, b) => a.sort - b.sort).map(a => a.value);
+const el = (tag, className = '', innerHTML = '') => { const e = document.createElement(tag); if (className) e.className = className; if (innerHTML) e.innerHTML = innerHTML; return e; };
+
+const parseMarkdownToHTML = (md) => {
+    let html = md
+        .replace(/```mermaid\n([\s\S]*?)```/gim, '<div class="my-8 bg-white border border-slate-200 rounded-xl p-6 shadow-sm overflow-x-auto mermaid-wrapper"><div class="flex justify-center min-w-fit w-full"><pre class="mermaid m-0">$1</pre></div></div>')
+        // Úprava obrázků: max-height, object-contain, zoom kurzor a onclick funkce pro Lightbox
+        .replace(/!\[([^\]]+)\]\(([^)]+)\)/gim, '<img src="$2" alt="$1" class="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md my-6 mx-auto border border-slate-200 cursor-zoom-in hover:shadow-lg hover:ring-2 hover:ring-blue-100 transition-all" onclick="App.openLightbox(this.src, this.alt)" title="Klikněte pro zvětšení" />')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-semibold hover:underline hover:text-blue-800 transition-colors inline-flex items-center gap-1">$1</a>')
+        .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mt-8 mb-3 text-slate-800">$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-10 mb-4 text-slate-800 border-b border-slate-200 pb-2">$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-extrabold mt-4 mb-8 text-slate-900">$1</h1>')
+        .replace(/\*\*(.*?)\*\*/gim, '<strong class="font-bold text-blue-900">$1</strong>')
+        .replace(/\*(.*?)\*/gim, '<em class="italic text-slate-700">$1</em>')
+        .replace(/^\> (.*$)/gim, '<blockquote class="border-l-4 border-blue-500 pl-5 py-2 my-6 bg-blue-50 text-slate-700 italic rounded-r-lg shadow-sm">$1</blockquote>')
+        .replace(/\n\n/gim, '</p><p class="mb-5 text-slate-700 leading-relaxed text-lg">');
+    return `<p class="mb-5 text-slate-700 leading-relaxed text-lg">${html}</p>`;
+};
+
+const App = {
+    state: {
+        title: '',
+        steps: [],
+        currentStepIndex: 0,
+        isSidebarOpen: false,
+        failedQuestions: [] 
+    },
+    root: document.getElementById('app'),
+
+    init: async function() {
+        this.renderLoading();
+        this.setupKeyboardShortcuts();
+
+        // 1. Získání parametrů z URL
+        const urlParams = new URLSearchParams(window.location.search);
+        // Podporujeme parametry "manifest" nebo "m" (např. ?m=lekce1.json). Výchozí je "manifest.json"
+        const manifestFileName = urlParams.get('manifest') || urlParams.get('m') || 'manifest.json';
+
+        if (window.location.protocol === 'file:' || window.location.protocol === 'data:' || window.location.protocol === 'about:') { 
+            setTimeout(() => this.renderUploader(manifestFileName), 500); 
+            return; 
+        }
+        
+        try {
+            // 2. Načtení konkrétního souboru podle parametru
+            const manifestRes = await fetch(manifestFileName);
+            if(!manifestRes.ok) throw new Error(`Manifest nenalezen: ${manifestFileName}`);
+            const manifest = await manifestRes.json();
+            
+            const mdRes = await fetch(manifest.mdUrl);
+            const mdText = await mdRes.text();
+            
+            const jsonRes = await fetch(manifest.jsonUrl);
+            const jsonData = await jsonRes.json();
+            
+            this.parseLesson(manifest.title, mdText, jsonData);
+        } catch (e) {
+            console.warn(`Chyba při stahování manifestu '${manifestFileName}'. Zobrazuji manuální nahrávání.`, e);
+            this.renderUploader(manifestFileName);
+        }
+    },
+
+    setupKeyboardShortcuts: function() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox) { lightbox.click(); return; }
+
+                const btns = Array.from(document.querySelectorAll('.btn-primary-action'));
+                const activeBtn = btns.find(b => b.offsetParent !== null && !b.disabled);
+                if (activeBtn) activeBtn.click();
+            }
+        });
+    },
+
+    openLightbox: function(src, alt) {
+        const lb = document.createElement('div');
+        lb.id = 'lightbox';
+        lb.className = 'fixed inset-0 z-[100] bg-slate-900/95 flex items-center justify-center p-4 md:p-10 cursor-zoom-out opacity-0 transition-opacity duration-300';
+        lb.innerHTML = `<img src="${src}" alt="${alt}" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl scale-95 transition-transform duration-300" />
+                        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-sm font-semibold tracking-widest uppercase">Kliknutím nebo Enterem zavřete</div>`;
+        lb.onclick = () => {
+            lb.classList.remove('opacity-100');
+            lb.querySelector('img').classList.remove('scale-100');
+            setTimeout(() => lb.remove(), 300);
+        };
+        document.body.appendChild(lb);
+        lb.offsetHeight;
+        lb.classList.add('opacity-100');
+        lb.querySelector('img').classList.add('scale-100');
+    },
+
+    renderUploader: function(attemptedFile) {
+        this.root.innerHTML = `
+            <div class="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+                <div class="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
+                    <h2 class="text-2xl font-bold mb-2 text-slate-800">Spustit lokální lekci</h2>
+                    <p class="text-slate-600 mb-6 text-sm">Soubor <strong>${attemptedFile}</strong> se nepodařilo načíst (pravděpodobně chybí nebo spouštíte web přímo z disku). Nahrajte soubory ručně.</p>
+                    
+                    <label class="block mb-4">
+                        <span class="text-sm font-bold text-slate-700">1. Soubor s teorií (.md)</span>
+                        <input type="file" id="mdFile" accept=".md" class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                    </label>
+                    
+                    <label class="block mb-8">
+                        <span class="text-sm font-bold text-slate-700">2. Soubor s otázkami (.json)</span>
+                        <input type="file" id="jsonFile" accept=".json" class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                    </label>
+
+                    <button id="startBtn" class="btn-primary-action w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors">Spustit lekci <span class="text-xs font-normal opacity-60 ml-1">(Enter)</span></button>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('startBtn').onclick = async () => {
+            const mdFile = document.getElementById('mdFile').files[0];
+            const jsonFile = document.getElementById('jsonFile').files[0];
+            
+            if (!mdFile || !jsonFile) {
+                alert("Vyberte prosím oba soubory (.md a .json).");
+                return;
+            }
+
+            try {
+                const mdText = await mdFile.text();
+                const jsonText = await jsonFile.text();
+                const jsonData = JSON.parse(jsonText);
+                this.parseLesson("Lokální lekce", mdText, jsonData);
+            } catch(e) {
+                alert("Chyba při čtení souborů. Zkontrolujte formát JSON.");
+            }
+        };
+    },
+
+    parseLesson: function(title, mdText, jsonData) {
+        const chunks = mdText.split(/<!-- ID: (.*?) -->/g);
+        const steps = [];
+        let stepCount = 1;
+        
+        for (let i = 0; i < chunks.length; i += 2) {
+            const content = chunks[i].trim();
+            const checkpointId = chunks[i + 1]?.trim();
+            
+            if (content) {
+                let stepTitle = 'Teorie'; 
+                const headingMatch = content.match(/^#+\s+(.+)$/m);
+                if (headingMatch && headingMatch[1]) {
+                    stepTitle = headingMatch[1].trim();
+                }
+
+                steps.push({ id: `step_${stepCount++}`, title: stepTitle, type: 'theory', content });
+            }
+            if (checkpointId && jsonData[checkpointId]) {
+                const questions = jsonData[checkpointId].map(q => JSON.parse(JSON.stringify(q)));
+                steps.push({ id: `step_${stepCount++}`, title: 'Kvíz', type: 'quiz', questions });
+            }
+        }
+        
+        this.state.title = title;
+        this.state.steps = steps;
+        this.state.currentStepIndex = 0;
+        this.state.failedQuestions = [];
+        this.renderLayout();
+    },
+
+    reportFailedQuestion: function(questionObj) {
+        const exists = this.state.failedQuestions.find(q => q.q === questionObj.q);
+        if (!exists) {
+            this.state.failedQuestions.push(JSON.parse(JSON.stringify(questionObj)));
+        }
+    },
+
+    handleNext: function() {
+        if (this.state.currentStepIndex < this.state.steps.length - 1) {
+            this.state.currentStepIndex++;
+            this.renderLayout();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            if (this.state.failedQuestions.length > 0) {
+                this.state.steps.push({
+                    id: 'step_retry',
+                    title: 'Opakování chyb',
+                    type: 'quiz',
+                    isRetryBlock: true,
+                    questions: [...this.state.failedQuestions]
+                });
+                this.state.failedQuestions = []; 
+                this.state.currentStepIndex++;
+                this.renderLayout();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                this.renderFinished();
+            }
+        }
+    },
+
+    handlePrev: function() {
+        if (this.state.currentStepIndex > 0) {
+            this.state.currentStepIndex--;
+            this.renderLayout();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    },
+
+    jumpToStep: function(index) {
+        this.state.currentStepIndex = index;
+        this.state.isSidebarOpen = false;
+        this.renderLayout();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    toggleSidebar: function() {
+        this.state.isSidebarOpen = !this.state.isSidebarOpen;
+        const sb = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (this.state.isSidebarOpen) {
+            sb.classList.remove('sidebar-closed'); 
+            sb.classList.add('sidebar-open');
+            overlay.classList.remove('hidden'); 
+            overlay.classList.add('block');
+        } else {
+            sb.classList.remove('sidebar-open'); 
+            sb.classList.add('sidebar-closed');
+            overlay.classList.remove('block'); 
+            overlay.classList.add('hidden');
+        }
+    },
+
+    renderLoading: function() {
+        this.root.innerHTML = `<div class="min-h-screen flex items-center justify-center"><div class="text-blue-600 flex flex-col items-center gap-4 fade-in"><div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div><p class="font-semibold">Načítám lekci...</p></div></div>`;
+    },
+
+    renderFinished: function() {
+        this.root.innerHTML = `
+            <div class="min-h-screen flex items-center justify-center p-6 slide-up">
+                <div class="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-10 text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-green-500"></div>
+                    <div class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        ${icons.check}
+                    </div>
+                    <h2 class="text-3xl font-bold text-slate-800 mb-4">Lekce dokončena!</h2>
+                    <p class="text-slate-600 mb-8 text-lg">Skvělá práce. Prošli jste veškerou teorii a úspěšně vyřešili všechny úlohy.</p>
+                    
+                    <div class="space-y-3">
+                        <button id="restartBtn" class="btn-primary-action w-full py-4 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg transition-colors shadow-lg shadow-blue-200">
+                            ${icons.refresh} Zopakovat lekci <span class="text-xs font-normal opacity-60 ml-1">(Enter)</span>
+                        </button>
+                        <a href="/" class="w-full py-4 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-lg transition-colors">
+                            ${icons.home} Návrat do menu
+                        </a>
+                    </div>
+                </div>
+            </div>`;
+            
+        document.getElementById('restartBtn').onclick = () => {
+            this.state.failedQuestions = [];
+            this.state.currentStepIndex = 0;
+            this.state.steps = this.state.steps.filter(s => !s.isRetryBlock);
+            this.renderLayout();
+        };
+    },
+
+    renderLayout: function() {
+        const step = this.state.steps[this.state.currentStepIndex];
+        const progress = (this.state.currentStepIndex / Math.max(1, this.state.steps.length - 1)) * 100;
+
+        let sidebarItems = this.state.steps.map((s, idx) => `
+            <button onclick="App.jumpToStep(${idx})" class="w-full text-left px-4 py-3 rounded-lg font-medium transition-colors mb-1 ${idx === this.state.currentStepIndex ? 'bg-blue-100 text-blue-800' : 'text-slate-600 hover:bg-slate-100'}">
+                <span class="text-sm font-bold opacity-50 mr-2">${idx + 1}.</span> ${s.title} ${s.isRetryBlock ? ' 🔁' : ''}
+            </button>
+        `).join('');
+
+        let html = `
+            <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-40 hidden backdrop-blur-sm transition-opacity" onclick="App.toggleSidebar()"></div>
+            
+            <div id="sidebar" class="fixed top-0 left-0 w-72 h-full bg-white shadow-2xl z-50 sidebar-closed flex flex-col">
+                <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <span class="font-bold text-slate-800">Obsah lekce</span>
+                    <button onclick="App.toggleSidebar()" class="text-slate-500 hover:text-slate-800 p-1 rounded-md hover:bg-slate-200">${icons.x}</button>
+                </div>
+                <div class="p-3 flex-1 overflow-y-auto">${sidebarItems}</div>
+            </div>
+
+            <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+                <div class="max-w-4xl mx-auto px-4 h-16 flex items-center gap-4">
+                    <button onclick="App.toggleSidebar()" class="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-xl transition-colors" title="Otevřít navigaci">
+                        ${icons.menu}
+                    </button>
+                    <div class="flex items-center gap-3 font-bold text-slate-800 flex-1 truncate">
+                        <span class="truncate">${this.state.title}</span>
+                    </div>
+                    <div class="text-sm font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full whitespace-nowrap hidden sm:block">
+                        Část ${this.state.currentStepIndex + 1} z ${this.state.steps.length}
+                    </div>
+                    <a href="/" class="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-xl transition-colors" title="Návrat do menu">
+                        ${icons.home}
+                    </a>
+                </div>
+                <div class="w-full bg-slate-100 h-1.5">
+                    <div class="bg-blue-600 h-full transition-all duration-700 ease-out" style="width: ${progress}%"></div>
+                </div>
+            </header>
+
+            <main id="mainContent" class="max-w-4xl mx-auto px-4 py-8 md:py-12 slide-up"></main>
+        `;
+        
+        this.root.innerHTML = html;
+        const main = document.getElementById('mainContent');
+        
+        if (step.type === 'theory') main.appendChild(this.components.theory(step));
+        else if (step.type === 'quiz') main.appendChild(this.components.quiz(step));
+
+        const initMermaid = (retries = 10) => {
+            if (window.mermaid) {
+                try { 
+                    if (!window.mermaidInitialized) {
+                        mermaid.initialize({ 
+                            startOnLoad: false, 
+                            theme: 'neutral',
+                            themeVariables: { fontFamily: 'ui-sans-serif, system-ui, sans-serif', fontSize: '16px' },
+                            flowchart: { useMaxWidth: false }, sequence: { useMaxWidth: false }, journey: { useMaxWidth: false },
+                            gantt: { useMaxWidth: false }, state: { useMaxWidth: false }, er: { useMaxWidth: false }, pie: { useMaxWidth: false }
+                        });
+                        window.mermaidInitialized = true;
+                    }
+                    mermaid.run({ querySelector: '.mermaid' }); 
+                } catch(e) { console.error("Mermaid chyba při renderování:", e); }
+            } else if (retries > 0) {
+                setTimeout(() => initMermaid(retries - 1), 200);
+            }
+        };
+        setTimeout(() => initMermaid(), 100);
+    },
+
+    components: {
+        navButtons: function(hideNext = false) {
+            const wrap = el('div', 'flex items-center justify-between mt-8 border-t border-slate-200 pt-6');
+            
+            const prevBtn = el('button', `flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-colors ${App.state.currentStepIndex > 0 ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-sm' : 'opacity-0 cursor-default pointer-events-none'}`);
+            prevBtn.innerHTML = `${icons.arrowLeft} Předchozí`;
+            if (App.state.currentStepIndex > 0) prevBtn.onclick = () => App.handlePrev();
+            wrap.appendChild(prevBtn);
+            
+            if (!hideNext) {
+                const nextBtn = el('button', 'btn-primary-action flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm ml-auto');
+                nextBtn.innerHTML = `Pokračovat ${icons.arrowRight} <span class="text-xs font-normal opacity-60 ml-1 hidden sm:inline">(Enter)</span>`;
+                nextBtn.onclick = () => App.handleNext();
+                wrap.appendChild(nextBtn);
+            }
+
+            return wrap;
+        },
+
+        theory: function(step) {
+            const container = el('div');
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-10 mb-6">
+                    <div class="prose prose-slate max-w-none">${parseMarkdownToHTML(step.content)}</div>
+                </div>`;
+            container.appendChild(this.navButtons());
+            return container;
+        },
+
+        quiz: function(step) {
+            const container = el('div', 'max-w-3xl mx-auto');
+            let currentQIndex = 0;
+
+            const renderQuestionBlock = () => {
+                const question = step.questions[currentQIndex];
+                const isLastQuestion = currentQIndex === step.questions.length - 1;
+                
+                const retryBadge = step.isRetryBlock 
+                    ? `<div class="bg-orange-100 text-orange-800 px-4 py-2 text-sm font-semibold mb-4 rounded-xl flex items-center gap-2">⚠️ Toto jsou otázky, ve kterých se předtím chybovalo. Zkusme to znovu!</div>` 
+                    : '';
+
+                container.innerHTML = `
+                    ${retryBadge}
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-center">
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full ${step.isRetryBlock ? 'bg-orange-500' : 'bg-blue-500'} animate-pulse"></span> 
+                                Prověření znalostí
+                            </span>
+                            ${step.questions.length > 1 ? `<span class="text-sm font-semibold bg-slate-200 text-slate-700 px-3 py-1 rounded-lg">Úloha ${currentQIndex + 1} / ${step.questions.length}</span>` : ''}
+                        </div>
+                        <div id="quizBody" class="p-6 md:p-8"></div>
+                    </div>
+                    <div id="quizFooter"></div>
+                `;
+
+                container.querySelector('#quizFooter').appendChild(App.components.navButtons(true));
+
+                const body = container.querySelector('#quizBody');
+                const onNextAction = () => {
+                    if (!isLastQuestion) {
+                        currentQIndex++;
+                        renderQuestionBlock();
+                    } else {
+                        App.handleNext(); 
+                    }
+                };
+
+                if (!question.type || question.type === 'mcq') body.appendChild(App.components.mcq(question, onNextAction, isLastQuestion));
+                else if (question.type === 'match') body.appendChild(App.components.match(question, onNextAction, isLastQuestion));
+                else if (question.type === 'fill') body.appendChild(App.components.fill(question, onNextAction, isLastQuestion));
+            };
+
+            renderQuestionBlock();
+            return container;
+        },
+
+        mcq: function(question, onNext, isLast) {
+            const wrapper = el('div');
+            if(!question._options) question._options = shuffleArray(question.o.map((text, idx) => ({ text, isCorrect: idx === question.a })));
+            let submitted = false;
+
+            const render = () => {
+                wrapper.innerHTML = `<h3 class="text-xl font-bold text-slate-800 mb-6">${question.q}</h3><div id="opts" class="space-y-3"></div><div id="feedback"></div>`;
+                const optsDiv = wrapper.querySelector('#opts');
+
+                question._options.forEach((opt) => {
+                    const btn = el('button', 'w-full text-left p-4 rounded-xl border-2 transition-all flex items-center justify-between ');
+                    btn.innerHTML = `<span class="font-medium">${opt.text}</span>`;
+                    
+                    if (!submitted) {
+                        btn.className += "border-slate-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-900 text-slate-700 shadow-sm";
+                        btn.onclick = () => {
+                            submitted = true; opt.selected = true;
+                            if (!opt.isCorrect) App.reportFailedQuestion(question);
+                            render();
+                        };
+                    } else {
+                        if (opt.isCorrect) {
+                            btn.className += "border-green-500 bg-green-50 text-green-900";
+                            btn.innerHTML += `<span class="text-green-600 shrink-0">${icons.check}</span>`;
+                        } else if (opt.selected) {
+                            btn.className += "border-red-500 bg-red-50 text-red-900";
+                            btn.innerHTML += `<span class="text-red-600 shrink-0">${icons.x}</span>`;
+                        } else {
+                            btn.className += "border-slate-100 bg-slate-50 opacity-50 text-slate-500";
+                        }
+                    }
+                    optsDiv.appendChild(btn);
+                });
+
+                if (submitted) {
+                    const isCorrect = question._options.find(o => o.selected && o.isCorrect);
+                    const btnText = isLast ? `Pokračovat na další část ${icons.arrowRight}` : `Další úloha ${icons.arrowRight}`;
+                    
+                    const fbDiv = wrapper.querySelector('#feedback');
+                    fbDiv.className = "mt-6 fade-in";
+                    fbDiv.innerHTML = `
+                        <div class="p-4 rounded-xl flex items-start gap-3 mb-6 ${isCorrect ? 'bg-green-100/50 text-green-900' : 'bg-orange-100/50 text-orange-900'}">
+                            <span class="shrink-0 mt-0.5 text-current opacity-80">${icons.info}</span>
+                            <div>
+                                <strong class="block mb-1 text-lg">${isCorrect ? 'Správně!' : 'Není to úplně ono.'}</strong>
+                                <p class="text-sm leading-relaxed">${question.e}</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-end"><button id="btnNxt" class="btn-primary-action flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium transition-colors shadow-md">${btnText}</button></div>`;
+                    fbDiv.querySelector('#btnNxt').onclick = onNext;
+                }
+            };
+            render(); return wrapper;
+        },
+
+        match: function(question, onNext, isLast) {
+            const wrapper = el('div');
+            if(!question._left) {
+                question._left = shuffleArray(question.pairs.map((p, i) => ({ id: i, text: p.l })));
+                question._right = shuffleArray(question.pairs.map((p, i) => ({ id: i, text: p.r })));
+            }
+            let matches = [], selectedLeft = null, selectedRight = null, errorPair = null;
+            let firstAttemptFailed = false;
+
+            const render = () => {
+                wrapper.innerHTML = `<h3 class="text-xl font-bold text-slate-800 mb-6">${question.q}</h3><div id="grid" class="grid grid-cols-2 gap-4 mb-6"></div><div id="feedback"></div>`;
+                const colLeft = el('div', 'space-y-3'), colRight = el('div', 'space-y-3');
+
+                const createBtn = (item, isLeft) => {
+                    const isMatched = matches.includes(item.id);
+                    const isSelected = isLeft ? selectedLeft === item.id : selectedRight === item.id;
+                    const isError = errorPair && (isLeft ? errorPair.l === item.id : errorPair.r === item.id);
+                    
+                    const btn = el('button', `w-full p-4 text-left rounded-xl border-2 transition-all text-sm shadow-sm font-medium ${isMatched ? "border-green-500 bg-green-50 text-green-800 opacity-50 cursor-default" : isError ? "border-red-500 bg-red-50 text-red-800 animate-shake" : isSelected ? "border-blue-500 bg-blue-50 text-blue-900 ring-4 ring-blue-100" : "border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50"}`);
+                    btn.textContent = item.text;
+                    
+                    if (!isMatched && !errorPair) {
+                        btn.onclick = () => {
+                            if (isLeft) selectedLeft = item.id; else selectedRight = item.id;
+                            
+                            if (selectedLeft !== null && selectedRight !== null) {
+                                if (selectedLeft === selectedRight) {
+                                    matches.push(selectedLeft);
+                                    selectedLeft = null; selectedRight = null;
+                                    render();
+                                } else {
+                                    errorPair = { l: selectedLeft, r: selectedRight };
+                                    if(!firstAttemptFailed && matches.length === 0) { 
+                                        App.reportFailedQuestion(question); 
+                                        firstAttemptFailed = true; 
+                                    }
+                                    selectedLeft = null; selectedRight = null;
+                                    render(); 
+                                    setTimeout(() => { errorPair = null; render(); }, 800); 
+                                }
+                            } else {
+                                render();
+                            }
+                        };
+                    }
+                    return btn;
+                };
+
+                question._left.forEach(i => colLeft.appendChild(createBtn(i, true)));
+                question._right.forEach(i => colRight.appendChild(createBtn(i, false)));
+                wrapper.querySelector('#grid').append(colLeft, colRight);
+
+                if (matches.length === question.pairs.length && question._left.length > 0) {
+                    const btnText = isLast ? `Pokračovat na další část ${icons.arrowRight}` : `Další úloha ${icons.arrowRight}`;
+                    const fb = wrapper.querySelector('#feedback');
+                    fb.className = "mt-6 fade-in";
+                    fb.innerHTML = `<div class="p-4 rounded-xl flex items-start gap-3 mb-6 bg-green-100/50 text-green-900"><span class="text-green-600 shrink-0 mt-0.5">${icons.check}</span><div><strong class="block mb-1 text-lg">Skvěle!</strong><p class="text-sm leading-relaxed">${question.e}</p></div></div><div class="flex justify-end"><button id="btnNxt" class="btn-primary-action flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-medium">${btnText}</button></div>`;
+                    fb.querySelector('#btnNxt').onclick = onNext;
+                }
+            };
+            render(); return wrapper;
+        },
+
+        fill: function(question, onNext, isLast) {
+            const wrapper = el('div');
+            if(!question._words) question._words = shuffleArray([...question.blanks, ...(question.distractors || [])]);
+            let slots = Array(question.blanks.length).fill(null), isSubmitted = false, errors = [], firstAttemptDone = false;
+
+            const render = () => {
+                wrapper.innerHTML = `<h3 class="text-xl font-bold text-slate-800 mb-6">${question.q}</h3><div id="sentence" class="bg-white p-6 rounded-2xl border border-slate-200 text-lg leading-loose text-slate-700 mb-8 shadow-sm"></div><div id="wbArea" class="mb-8"></div><div id="controls" class="flex justify-end mt-6"></div>`;
+                const isAllFilled = !slots.includes(null), isAllCorrect = isSubmitted && errors.length === 0;
+
+                const sentence = wrapper.querySelector('#sentence');
+                question.text.split(/\{(\d+)\}/g).forEach((part, i) => {
+                    if (i % 2 !== 0) {
+                        const slotIdx = parseInt(part);
+                        const word = slots[slotIdx];
+                        let slotClass = 'slot-empty';
+                        
+                        if (word) {
+                            if (isSubmitted && errors.includes(slotIdx)) slotClass = 'slot-error';
+                            else if (isAllCorrect) slotClass = 'slot-correct';
+                            else slotClass = 'slot-filled';
+                        }
+                        
+                        const span = el('span', `slot-btn ${slotClass}`);
+                        span.textContent = word || '___';
+                        span.onclick = () => { if (!isSubmitted) { slots[slotIdx] = null; render(); } };
+                        sentence.appendChild(span);
+                    } else {
+                        sentence.appendChild(document.createTextNode(part));
+                    }
+                });
+
+                const wbArea = wrapper.querySelector('#wbArea');
+                if (!isAllCorrect) {
+                    const availableWords = question._words.filter(w => !slots.includes(w));
+                    wbArea.innerHTML = `<p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Dostupné pojmy</p><div id="tags" class="flex flex-wrap gap-2"></div>`;
+                    availableWords.forEach(word => {
+                        const btn = el('button', 'px-4 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-slate-400 font-medium active:scale-95 shadow-sm');
+                        btn.textContent = word;
+                        btn.onclick = () => { if(!isSubmitted) { const idx = slots.indexOf(null); if (idx !== -1) { slots[idx] = word; render(); } } };
+                        wbArea.querySelector('#tags').appendChild(btn);
+                    });
+                }
+
+                const controls = wrapper.querySelector('#controls');
+                if (!isSubmitted) {
+                    const btn = el('button', `px-6 py-3 rounded-xl font-medium transition-all shadow-sm ${isAllFilled ? 'btn-primary-action bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`);
+                    btn.innerHTML = `Zkontrolovat větu <span class="text-xs font-normal opacity-60 ml-1 ${isAllFilled ? 'inline' : 'hidden'}">(Enter)</span>`; 
+                    btn.disabled = !isAllFilled;
+                    btn.onclick = () => {
+                        errors = slots.map((s, idx) => s !== question.blanks[idx] ? idx : null).filter(x => x !== null);
+                        isSubmitted = true;
+                        if (!firstAttemptDone && errors.length > 0) App.reportFailedQuestion(question);
+                        firstAttemptDone = true;
+                        render();
+                    };
+                    controls.appendChild(btn);
+                } else {
+                    controls.className = "w-full mt-6";
+                    if (isAllCorrect) {
+                        const btnText = isLast ? `Pokračovat na další část ${icons.arrowRight}` : `Další úloha ${icons.arrowRight}`;
+                        controls.innerHTML = `<div class="fade-in"><div class="p-4 rounded-xl flex items-start gap-3 mb-6 bg-green-100/50 text-green-900"><span class="text-green-600 shrink-0 mt-0.5">${icons.check}</span><div><strong class="block mb-1 text-lg">Skvělá práce!</strong><p class="text-sm leading-relaxed">${question.e}</p></div></div><div class="flex justify-end"><button id="btnNxt" class="btn-primary-action flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-medium">${btnText}</button></div></div>`;
+                        controls.querySelector('#btnNxt').onclick = onNext;
+                    } else {
+                        controls.innerHTML = `<div class="flex flex-col sm:flex-row gap-4 justify-between items-center bg-orange-50 border border-orange-200 p-4 rounded-xl fade-in"><div class="flex items-center gap-3 text-orange-800"><span class="shrink-0">${icons.x}</span> <span class="font-medium">Některá slova nejsou na správném místě.</span></div><button id="retryBtn" class="btn-primary-action px-5 py-2.5 bg-white border border-orange-300 text-orange-800 rounded-xl hover:bg-orange-100 font-medium whitespace-nowrap">Zkusit opravit <span class="text-xs font-normal opacity-60 ml-1">(Enter)</span></button></div>`;
+                        controls.querySelector('#retryBtn').onclick = () => { errors.forEach(idx => slots[idx] = null); isSubmitted = false; errors = []; render(); };
+                    }
+                }
+            };
+            render(); return wrapper;
+        }
+    }
+};
+
+window.addEventListener('DOMContentLoaded', () => App.init());
+</script>
+</body>
+</html>
