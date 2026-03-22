@@ -1,0 +1,37 @@
+{
+  "chk_bunka": [
+    {
+      "type": "mcq",
+      "q": "Co tvoří vnější hranici každé buňky a odděluje ji od okolního prostředí?",
+      "o": [
+        "Buněčná membrána",
+        "Buněčné jádro",
+        "Mitochondrie",
+        "DNA"
+      ],
+      "a": 0,
+      "e": "Přesně tak. Buněčná membrána funguje jako polopropustná bariéra (plot), která rozhoduje, co vstoupí dovnitř a co půjde ven."
+    }
+  ],
+  "chk_deleni": [
+    {
+      "type": "match",
+      "q": "Přiřaďte k sobě správné pojmy týkající se dělení buněk:",
+      "pairs": [
+        { "l": "Mitóza", "r": "Slouží k růstu a obnově tkání" },
+        { "l": "Meióza", "r": "Vytváří pohlavní buňky" },
+        { "l": "Dceřiná buňka", "r": "Vznikne po rozdělení" },
+        { "l": "DNA", "r": "Genetický návod buňky" }
+      ],
+      "e": "Výborně! Rozlišení mezi mitózou (růst a kopírování) a meiózou (pohlavní rozmnožování a poloviční informace) je klíčové."
+    },
+    {
+      "type": "fill",
+      "q": "Doplňte do textu chybějící slova (klikněte do banky slov):",
+      "text": "Během mitózy vznikají z jedné původní buňky {0} nové buňky. Tyto dceřiné buňky jsou geneticky {1} s původní buňkou. Tento proces zajišťuje plynulý {2} tkání.",
+      "blanks": ["dvě", "shodné", "růst"],
+      "distractors": ["čtyři", "odlišné", "zánik"],
+      "e": "Skvělá práce. Mitóza je vlastně dokonalé kopírování, díky kterému se nám např. zhojí odřená kůže nebo vyrostou vlasy."
+    }
+  ]
+}

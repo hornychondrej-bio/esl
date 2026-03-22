@@ -1,0 +1,47 @@
+{
+  "chk_kuze_obecne": [
+    {
+      "type": "mcq",
+      "q": "Jaká je přibližná plocha kůže průměrného dospělého člověka?",
+      "o": [
+        "0,5 až 1 m²",
+        "1,5 až 2 m²",
+        "3 až 4 m²",
+        "5 až 6 m²"
+      ],
+      "a": 1,
+      "e": "Správně! Kůže u dospělého člověka dosahuje plochy 1,5 až 2 m², což z ní činí největší orgán těla."
+    }
+  ],
+  "chk_vrstvy": [
+    {
+      "type": "match",
+      "q": "Přiřaďte k sobě správně vrstvy kůže a jejich charakteristiku či obsah:",
+      "pairs": [
+        { "l": "Pokožka (Epidermis)", "r": "Neobsahuje žádné krevní cévy" },
+        { "l": "Škára (Dermis)", "r": "Obsahuje krevní cévy a nervová zakončení" },
+        { "l": "Podkožní vazivo", "r": "Tvoří ho především tuková tkáň" },
+        { "l": "Melanocyty", "r": "Buňky produkující kožní pigment" }
+      ],
+      "e": "Výborně! Pokožka je bezcévná a živí se difuzí ze škáry. Podkožní vazivo slouží jako izolace a zásobárna tuku."
+    }
+  ],
+  "chk_termoregulace": [
+    {
+      "type": "fill",
+      "q": "Doplňte správné pojmy týkající se termoregulace kůže:",
+      "text": "Když je organismu příliš horko, dochází k {0} kožních cév (tzv. {1}). Zvýší se také produkce {2}, jehož odpařováním se tělo ochlazuje.",
+      "blanks": [
+        "rozšíření",
+        "vazodilatace",
+        "potu"
+      ],
+      "distractors": [
+        "zúžení",
+        "vazokonstrikce",
+        "mrazu"
+      ],
+      "e": "Správně! Přehřátí způsobí vazodilataci (rozšíření cév) a pocení, což maximalizuje výdej tepla do okolí."
+    }
+  ]
+}
