@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloom's Taxonomy Aim Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom scrollbar for better appearance */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+        
+        <!-- Header -->
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center md:items-start gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl font-bold text-slate-900 mb-2" data-i18n="title">🎓 Pedagogical Aims Analyzer</h1>
+                <p class="text-slate-600" data-i18n="subtitle">Evaluate your learning objectives using Bloom's Taxonomy. Paste a markdown list, and we'll analyze the action verbs, categorize their cognitive levels, and flag pedagogically unmeasurable (forbidden) verbs.</p>
+            </div>
+            <!-- Language Toggle -->
+            <div class="flex items-center bg-slate-200 rounded-lg p-1 shrink-0">
+                <button id="langEnBtn" class="px-3 py-1 text-sm font-medium rounded-md bg-white shadow-sm text-slate-800 transition-all">EN</button>
+                <button id="langCsBtn" class="px-3 py-1 text-sm font-medium rounded-md text-slate-500 hover:text-slate-700 transition-all">CS</button>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Input -->
+            <div class="lg:col-span-1 flex flex-col gap-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <label for="aimsInput" class="font-semibold text-slate-700" data-i18n="pasteLabel">Paste Markdown / List</label>
+                        <button id="loadSampleBtn" class="text-xs text-blue-600 hover:text-blue-800 underline" data-i18n="loadSample">Load Sample</button>
+                    </div>
+                    <textarea id="aimsInput" rows="16" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition-all" data-i18n-placeholder="placeholder" placeholder="- Student will understand...\n- ..."></textarea>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-slate-700 mb-1" data-i18n="uploadLabel">Or upload .md file</label>
+                        <input type="file" id="fileInput" accept=".md,.txt" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                    </div>
+
+                    <button id="analyzeBtn" class="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors shadow-sm" data-i18n="analyzeBtn">
+                        Analyze Aims
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Results & Chart -->
+            <div class="lg:col-span-2 flex flex-col gap-8">
+                
+                <!-- Table Output -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center flex-wrap gap-2">
+                        <h2 class="font-semibold text-slate-800" data-i18n="resultsTitle">Analysis Results</h2>
+                        <div class="flex items-center gap-2">
+                            <span id="resultsCount" class="text-xs font-medium bg-slate-200 text-slate-700 px-2 py-1 rounded-full">0 aims</span>
+                            <span id="warningsCount" class="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded-full hidden">0 warnings</span>
+                            <button id="exportCsvBtn" class="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium py-1 px-3 rounded-lg transition-colors shadow-sm ml-1" data-i18n="saveCsv">Save CSV</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 w-3/5" data-i18n="colAim">Pedagogical Aim</th>
+                                    <th scope="col" class="px-6 py-3 w-1/5" data-i18n="colLevel">Max Bloom Level</th>
+                                    <th scope="col" class="px-6 py-3 w-1/5 text-center" data-i18n="colWarnings">Warnings</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTableBody" class="divide-y divide-slate-100">
+                                <tr>
+                                    <td colspan="3" class="px-6 py-8 text-center text-slate-400 italic" id="emptyTableText" data-i18n="noAims">No aims analyzed yet. Paste your list and click Analyze.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center">
+                    <h2 class="font-semibold text-slate-800 mb-4 w-full text-left" data-i18n="chartTitle">Cognitive Domain Distribution</h2>
+                    <div class="w-full max-w-[350px] aspect-square relative">
+                        <canvas id="bloomChart"></canvas>
+                        <div id="chartPlaceholder" class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm italic bg-white/80" data-i18n="awaitingData">
+                            Awaiting data...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Guide Section -->
+        <div class="mt-8 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h2 class="font-semibold text-slate-800 mb-2 text-lg" data-i18n="guideTitle">Bloom's Taxonomy Guide</h2>
+            <p class="text-sm text-slate-600 mb-5" data-i18n="guideDesc">Hover over each category below to reveal the associated action verbs.</p>
+            <div id="guideContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 0. State & Translation Setup ---
+        // DEFAULT LANGUAGE SETTING: change to 'cs' to default to Czech, "en" to English
+        let currentLang = 'cs'; 
+
+        const translations = {
+            en: {
+                title: "🎓 Pedagogical Aims Analyzer",
+                subtitle: "Evaluate your learning objectives using Bloom's Taxonomy. Paste a markdown list, and we'll analyze the action verbs, categorize their cognitive levels, and flag pedagogically unmeasurable (forbidden) verbs.",
+                pasteLabel: "Paste Markdown / List",
+                loadSample: "Load Sample",
+                placeholder: "- Student will understand...\n- ...",
+                uploadLabel: "Or upload .md file",
+                analyzeBtn: "Analyze Aims",
+                resultsTitle: "Analysis Results",
+                saveCsv: "Save CSV",
+                colAim: "Pedagogical Aim",
+                colLevel: "Max Bloom Level",
+                colWarnings: "Warnings",
+                noAims: "No aims analyzed yet. Paste your list and click Analyze.",
+                chartTitle: "Cognitive Domain Distribution",
+                awaitingData: "Awaiting data...",
+                guideTitle: "Bloom's Taxonomy Guide",
+                guideDesc: "Hover over each category below to reveal the associated action verbs.",
+                unclassified: "Unclassified",
+                forbiddenWarning: "Forbidden Verb",
+                aimsCount: "aims",
+                warningsCount: "warnings"
+            },
+            cs: {
+                title: "🎓 Analyzátor pedagogických cílů",
+                subtitle: "Vyhodnoťte své vzdělávací cíle pomocí Bloomovy taxonomie. Vložte markdown seznam a my analyzujeme aktivní slovesa, zařadíme je do kognitivních úrovní a označíme pedagogicky neměřitelná (zakázaná) slovesa.",
+                pasteLabel: "Vložte Markdown / Seznam",
+                loadSample: "Načíst ukázku",
+                placeholder: "- Žák dokáže vyjmenovat...\n- ...",
+                uploadLabel: "Nebo nahrajte .md soubor",
+                analyzeBtn: "Analyzovat cíle",
+                resultsTitle: "Výsledky analýzy",
+                saveCsv: "Uložit CSV",
+                colAim: "Pedagogický cíl",
+                colLevel: "Max. úroveň Blooma",
+                colWarnings: "Varování",
+                noAims: "Zatím nebyly analyzovány žádné cíle. Vložte seznam a klikněte na Analyzovat.",
+                chartTitle: "Distribuce kognitivních domén",
+                awaitingData: "Čekám na data...",
+                guideTitle: "Průvodce Bloomovou taxonomií",
+                guideDesc: "Přejeďte myší přes každou kategorii níže pro zobrazení přiřazených aktivních sloves.",
+                unclassified: "Neklasifikováno",
+                forbiddenWarning: "Zakázané sloveso",
+                aimsCount: "cílů",
+                warningsCount: "varování"
+            }
+        };
+
+        const samples = {
+            en: `- Student will be able to analyze the root causes of the conflict.\n- Students will evaluate the effectiveness of the marketing campaign.\n- Student recognizes common logical fallacies and writes an essay to argue against them.\n- Learn new vocabulary.\n- Understand the principles of thermodynamics.`,
+            cs: `- Žák dokáže vyjmenovat planety sluneční soustavy.\n- Pochopit principy termodynamiky.\n- Žák charakterizuje hlavní postavy románu.\n- Žák aplikuje Pythagorovu větu při řešení praktických úloh.\n- Naučit se nová slovíčka z 5. lekce.\n- Žák zkonstruuje jednoduchý elektrický obvod.\n- Seznámit se s historií starověkého Řecka.`
+        };
+
+        // --- 1. Taxonomy & Verb Dictionary ---
+        const taxonomy = [
+            { 
+                level: 1, 
+                name: { en: "L1: Remember", cs: "L1: Zapamatovat" }, 
+                badge: "bg-slate-200 text-slate-800 border-slate-300", 
+                highlight: "bg-slate-200 text-slate-900",
+                words: {
+                    en: ["define", "defines", "list", "lists", "memorize", "memorizes", "repeat", "repeats", "state", "states", "name", "names", "reproduce", "reproduces", "recall", "recalls"],
+                    cs: ["definovat", "definuje", "vyjmenovat", "vyjmenuje", "napsat", "napíše", "popsat", "popíše", "reprodukovat", "reprodukuje", "seřadit", "seřadí", "pojmenovat", "pojmenuje", "přiřadit", "přiřadí", "vybrat", "vybere", "uvést", "uvede", "rozeznat", "rozezná"]
+                }
+            },
+            { 
+                level: 2, 
+                name: { en: "L2: Understand", cs: "L2: Porozumět" }, 
+                badge: "bg-sky-100 text-sky-800 border-sky-300", 
+                highlight: "bg-sky-200 text-sky-900",
+                words: {
+                    en: ["classify", "classifies", "describe", "describes", "characterize", "characterizes", "discuss", "discusses", "explain", "explains", "identify", "identifies", "locate", "locates", "recognize", "recognizes", "report", "reports", "translate", "translates", "summarize", "summarizes"],
+                    cs: ["charakterizovat", "charakterizuje", "vysvětlit", "vysvětlí", "objasnit", "objasní", "shrnout", "shrne", "přeložit", "přeloží", "rozpoznat", "rozpozná", "vyjádřit", "vyjádří", "znázornit", "znázorní"]
+                }
+            },
+            { 
+                level: 3, 
+                name: { en: "L3: Apply", cs: "L3: Aplikovat" }, 
+                badge: "bg-emerald-100 text-emerald-800 border-emerald-300", 
+                highlight: "bg-emerald-200 text-emerald-900",
+                words: {
+                    en: ["apply", "applies", "execute", "executes", "implement", "implements", "solve", "solves", "use", "uses", "demonstrate", "demonstrates", "interpret", "interprets", "operate", "operates", "schedule", "schedules", "sketch", "sketches"],
+                    cs: ["aplikovat", "aplikuje", "demonstrovat", "demonstruje", "interpretovat", "interpretuje", "použít", "použije", "řešit", "řeší", "vyzkoušet", "vyzkouší", "naplánovat", "naplánuje", "vypočítat", "vypočítá", "prokázat", "prokáže", "sestrojit", "sestrojí"]
+                }
+            },
+            { 
+                level: 4, 
+                name: { en: "L4: Analyze", cs: "L4: Analyzovat" }, 
+                badge: "bg-amber-100 text-amber-800 border-amber-300", 
+                highlight: "bg-amber-200 text-amber-900",
+                words: {
+                    en: ["analyze", "analyzes", "differentiate", "differentiates", "organize", "organizes", "relate", "relates", "compare", "compares", "contrast", "contrasts", "distinguish", "distinguishes", "examine", "examines", "experiment", "experiments", "test", "tests"],
+                    cs: ["analyzovat", "analyzuje", "porovnat", "porovná", "rozlišit", "rozliší", "uspořádat", "uspořádá", "zkoumat", "zkoumá", "testovat", "testuje", "kategorizovat", "kategorizuje", "roztřídit", "roztřídí", "specifikovat", "specifikuje", "dedukovat", "dedukuje"]
+                }
+            },
+            { 
+                level: 5, 
+                name: { en: "L5: Evaluate", cs: "L5: Hodnotit" }, 
+                badge: "bg-orange-100 text-orange-800 border-orange-300", 
+                highlight: "bg-orange-200 text-orange-900",
+                words: {
+                    en: ["appraise", "appraises", "argue", "argues", "defend", "defends", "judge", "judges", "select", "selects", "support", "supports", "value", "values", "critique", "critiques", "weigh", "weighs", "evaluate", "evaluates"],
+                    cs: ["hodnotit", "hodnotí", "posoudit", "posoudí", "obhájit", "obhájí", "kritizovat", "kritizuje", "zhodnotit", "zhodnotí", "argumentovat", "argumentuje", "prověřit", "prověří", "rozhodnout", "rozhodne", "ocenit", "ocení", "zdůvodnit", "zdůvodní"]
+                }
+            },
+            { 
+                level: 6, 
+                name: { en: "L6: Create", cs: "L6: Tvořit" }, 
+                badge: "bg-purple-100 text-purple-800 border-purple-300", 
+                highlight: "bg-purple-200 text-purple-900",
+                words: {
+                    en: ["create", "creates", "design", "designs", "assemble", "assembles", "construct", "constructs", "conjecture", "conjectures", "develop", "develops", "formulate", "formulates", "author", "authors", "investigate", "investigates", "compose", "composes"],
+                    cs: ["vytvořit", "vytvoří", "navrhnout", "navrhne", "sestavit", "sestaví", "formulovat", "formuluje", "vyvinout", "vyvine", "komponovat", "komponuje", "zkonstruovat", "zkonstruuje", "vymyslet", "vymyslí", "syntetizovat", "syntetizuje"]
+                }
+            }
+        ];
+
+        const forbidden = {
+            level: 0,
+            name: { en: "Forbidden / Unmeasurable", cs: "Zakázané / Neměřitelné" },
+            badge: "bg-red-100 text-red-800 border-red-300",
+            highlight: "bg-red-500 text-white font-semibold shadow-sm",
+            words: {
+                en: ["know", "knows", "understand", "understands", "learn", "learns", "realize", "realizes", "appreciate", "appreciates", "familiarize", "familiarizes"],
+                cs: ["znát", "zná", "rozumět", "rozumí", "pochopit", "pochopí", "uvědomit si", "uvědomí si", "naučit se", "naučí se", "vědět", "ví", "osvojit si", "osvojí si", "seznámit se", "seznámí se", "vnímat", "vnímá", "chápat", "chápe"]
+            }
+        };
+
+        const allCategories = [...taxonomy, forbidden];
+
+        const chartColors = ['#e2e8f0', '#bae6fd', '#a7f3d0', '#fde68a', '#fed7aa', '#e9d5ff', '#f1f5f9'];
+        let pieChart = null;
+        let currentResults = [];
+        let currentLevelCounts = null;
+
+        // --- 2. Helper Functions ---
+        const escapeHtml = (str) => {
+            return str.replace(/[&<>"']/g, match => {
+                const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                return escapeMap[match];
+            });
+        };
+
+        const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const updateUI = () => {
+            // Update Toggle buttons
+            document.getElementById('langEnBtn').className = currentLang === 'en' 
+                ? "px-3 py-1 text-sm font-medium rounded-md bg-white shadow-sm text-slate-800 transition-all" 
+                : "px-3 py-1 text-sm font-medium rounded-md text-slate-500 hover:text-slate-700 transition-all cursor-pointer";
+            document.getElementById('langCsBtn').className = currentLang === 'cs' 
+                ? "px-3 py-1 text-sm font-medium rounded-md bg-white shadow-sm text-slate-800 transition-all" 
+                : "px-3 py-1 text-sm font-medium rounded-md text-slate-500 hover:text-slate-700 transition-all cursor-pointer";
+
+            // Update text based on data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerText = translations[currentLang][key];
+                }
+            });
+
+            // Update placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang][key]) {
+                    el.setAttribute('placeholder', translations[currentLang][key]);
+                }
+            });
+
+            // Re-render components to reflect new language
+            renderGuide();
+            if (currentResults.length > 0) {
+                // Re-process entirely to apply new language regex verbs to existing input
+                processAims(); 
+            } else {
+                // Update empty state text specifically if no results
+                const emptyTableText = document.getElementById('emptyTableText');
+                if (emptyTableText) emptyTableText.innerText = translations[currentLang].noAims;
+            }
+        };
+
+        const setLanguage = (lang) => {
+            if (currentLang === lang) return;
+            currentLang = lang;
+            updateUI();
+        };
+
+        const renderGuide = () => {
+            const container = document.getElementById('guideContainer');
+            container.innerHTML = '';
+            allCategories.forEach(cat => {
+                container.innerHTML += `
+                    <div class="group relative p-4 rounded-lg border ${cat.badge} cursor-default bg-opacity-30 hover:bg-opacity-100 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-1">
+                            <h3 class="font-semibold text-sm">${cat.name[currentLang]}</h3>
+                            <svg class="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="overflow-hidden max-h-0 group-hover:max-h-96 transition-all duration-500 ease-in-out">
+                            <p class="text-xs mt-3 opacity-90 leading-relaxed">${cat.words[currentLang].join(', ')}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        // --- 3. Core Logic ---
+        const processAims = () => {
+            const inputText = document.getElementById('aimsInput').value;
+            const lines = inputText.split('\n').filter(line => line.trim().length > 0);
+            
+            const results = [];
+            const levelCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, "Unclassified": 0 };
+
+            lines.forEach(line => {
+                let rawText = line.replace(/^[\s\-\*]+(?:\d+\.)?\s*/, '').trim();
+                if (!rawText) return;
+
+                let matches = [];
+                let highestLevel = 0;
+                let hasForbidden = false;
+
+                allCategories.forEach(cat => {
+                    // Search words of current language only
+                    const sortedWords = [...cat.words[currentLang]].sort((a, b) => b.length - a.length);
+                    
+                    sortedWords.forEach(word => {
+                        const regex = new RegExp(`(^|[\\s.,;:!?()'"\\-])(${escapeRegExp(word)})(?=[\\s.,;:!?()'"\\-]|$)`, 'gi');
+                        let match;
+                        while ((match = regex.exec(rawText)) !== null) {
+                            matches.push({
+                                start: match.index + match[1].length,
+                                end: match.index + match[1].length + match[2].length,
+                                word: match[2],
+                                category: cat
+                            });
+                        }
+                    });
+                });
+
+                matches.sort((a, b) => a.start - b.start || b.end - a.end);
+                let filteredMatches = [];
+                let lastEnd = 0;
+                
+                for (let m of matches) {
+                    if (m.start >= lastEnd) {
+                        filteredMatches.push(m);
+                        lastEnd = m.end;
+                    }
+                }
+
+                let highlightedHtml = "";
+                let currentIndex = 0;
+
+                filteredMatches.forEach(m => {
+                    highlightedHtml += escapeHtml(rawText.substring(currentIndex, m.start));
+                    highlightedHtml += `<span class="px-1.5 py-0.5 rounded ${m.category.highlight}">${escapeHtml(m.word)}</span>`;
+                    currentIndex = m.end;
+
+                    if (m.category.level > 0) {
+                        highestLevel = Math.max(highestLevel, m.category.level);
+                    } else if (m.category.level === 0) {
+                        hasForbidden = true;
+                    }
+                });
+                highlightedHtml += escapeHtml(rawText.substring(currentIndex));
+
+                if (highestLevel > 0) {
+                    levelCounts[highestLevel]++;
+                } else {
+                    levelCounts["Unclassified"]++;
+                }
+
+                results.push({
+                    original: rawText,
+                    highlighted: highlightedHtml,
+                    level: highestLevel,
+                    hasForbidden: hasForbidden
+                });
+            });
+
+            currentResults = results;
+            currentLevelCounts = levelCounts;
+            renderResults(results);
+            renderChart(levelCounts);
+        };
+
+        const renderResults = (results) => {
+            const tbody = document.getElementById('resultsTableBody');
+            document.getElementById('resultsCount').innerText = `${results.length} ${translations[currentLang].aimsCount}`;
+            
+            const warningsCount = results.filter(r => r.hasForbidden).length;
+            const wcElem = document.getElementById('warningsCount');
+            wcElem.innerText = `${warningsCount} ${translations[currentLang].warningsCount}`;
+            if (warningsCount > 0) {
+                wcElem.classList.remove('hidden');
+            } else {
+                wcElem.classList.add('hidden');
+            }
+
+            tbody.innerHTML = '';
+
+            if (results.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-slate-400 italic" id="emptyTableText" data-i18n="noAims">${translations[currentLang].noAims}</td></tr>`;
+                return;
+            }
+
+            results.forEach(res => {
+                let levelBadge = `<span class="whitespace-nowrap inline-block px-2.5 py-1 rounded-full text-xs font-medium border bg-slate-100 text-slate-500 border-slate-200">${translations[currentLang].unclassified}</span>`;
+                if (res.level > 0) {
+                    const cat = taxonomy.find(t => t.level === res.level);
+                    levelBadge = `<span class="whitespace-nowrap inline-block px-2.5 py-1 rounded-full text-xs font-medium border ${cat.badge}">${cat.name[currentLang]}</span>`;
+                }
+
+                let warningIcon = res.hasForbidden 
+                    ? `<div class="inline-flex items-center justify-center gap-1 text-red-600 font-semibold text-xs bg-red-50 py-1 px-2 rounded-full border border-red-100 whitespace-nowrap">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        ${translations[currentLang].forbiddenWarning}
+                       </div>` 
+                    : `<span class="text-slate-300 flex justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-slate-700 leading-relaxed">${res.highlighted}</td>
+                    <td class="px-6 py-4">${levelBadge}</td>
+                    <td class="px-6 py-4 text-center">${warningIcon}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        const renderChart = (counts) => {
+            const ctx = document.getElementById('bloomChart').getContext('2d');
+            document.getElementById('chartPlaceholder').style.display = 'none';
+
+            const dataValues = [counts[1], counts[2], counts[3], counts[4], counts[5], counts[6], counts["Unclassified"]];
+
+            if (dataValues.every(v => v === 0)) {
+                if (pieChart) pieChart.destroy();
+                document.getElementById('chartPlaceholder').style.display = 'flex';
+                return;
+            }
+
+            if (pieChart) pieChart.destroy();
+
+            pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: [
+                        taxonomy[0].name[currentLang], taxonomy[1].name[currentLang], taxonomy[2].name[currentLang], 
+                        taxonomy[3].name[currentLang], taxonomy[4].name[currentLang], taxonomy[5].name[currentLang], 
+                        translations[currentLang].unclassified
+                    ],
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: chartColors,
+                        borderWidth: 1,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 15, font: { size: 11, family: "'Inter', sans-serif" } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed !== null) label += context.parsed + ` ${translations[currentLang].aimsCount}`;
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        // --- 4. Event Listeners ---
+        document.getElementById('langEnBtn').addEventListener('click', () => setLanguage('en'));
+        document.getElementById('langCsBtn').addEventListener('click', () => setLanguage('cs'));
+        document.getElementById('analyzeBtn').addEventListener('click', processAims);
+        
+        document.getElementById('loadSampleBtn').addEventListener('click', () => {
+            document.getElementById('aimsInput').value = samples[currentLang];
+            processAims();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('aimsInput').value = e.target.result;
+                processAims();
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            if (!currentResults || currentResults.length === 0) return;
+            let csvContent = "aim;Lx\n";
+            currentResults.forEach(res => {
+                const levelStr = res.level > 0 ? `L${res.level}` : (res.hasForbidden ? "L0" : "Unclassified");
+                let cleanAim = res.original.replace(/"/g, '""');
+                if (cleanAim.includes(';') || cleanAim.includes('\n') || cleanAim.includes('"')) {
+                    cleanAim = `"${cleanAim}"`;
+                }
+                csvContent += `${cleanAim};${levelStr}\n`;
+            });
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "aims_analysis.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Initialize UI
+        updateUI();
+
+    </script>
+</body>
+</html>
