@@ -1,0 +1,206 @@
+[
+  {
+    "id": 1,
+    "question": "Jaký je latinský název pro varle, kde dochází k produkci spermií?",
+    "options": [
+      "Epididymis",
+      "Testis",
+      "Prostata",
+      "Scrotum"
+    ],
+    "answer": "Testis",
+    "explanation": "Testis (varle) je párová mužská pohlavní žláza, jejíž hlavní funkcí je spermatogeneze a produkce testosteronu."
+  },
+  {
+    "id": 2,
+    "question": "Kde dochází k dozrávání a shromažďování spermií před ejakulací?",
+    "options": [
+      "V chámovodu",
+      "V nadvarleti",
+      "V semenných váčcích",
+      "V močové trubici"
+    ],
+    "answer": "V nadvarleti",
+    "explanation": "Nadvarle (epididymis) slouží jako rezervoár, kde spermie získávají schopnost samostatného pohybu."
+  },
+  {
+    "id": 3,
+    "question": "Jak se nazývá chirurgické přerušení chámovodů jako metoda antikoncepce?",
+    "options": [
+      "Kastrace",
+      "Vasektomie",
+      "Ejekce",
+      "Katetrizace"
+    ],
+    "answer": "Vasektomie",
+    "explanation": "Vasektomie přerušuje cestu spermiím z varlat do ejakulátu, aniž by ovlivnila produkci hormonů nebo erekci."
+  },
+  {
+    "id": 4,
+    "question": "Kolik chromozomů obsahuje zralá lidská gameta (spermie nebo vajíčko)?",
+    "options": [
+      "46",
+      "24",
+      "23",
+      "44 + XY"
+    ],
+    "answer": "23",
+    "explanation": "Pohlavní buňky jsou haploidní (n), vznikají meiózou a obsahují polovinu genetické sady běžné tělní buňky."
+  },
+  {
+    "id": 5,
+    "question": "Jaký je latinský název pro vaječník?",
+    "options": [
+      "Uterus",
+      "Ovarium",
+      "Tuba uterina",
+      "Vagina"
+    ],
+    "answer": "Ovarium",
+    "explanation": "Ovarium je ženská pohlavní žláza, ve které dochází k dozrávání folikulů a produkci estrogenů."
+  },
+  {
+    "id": 6,
+    "question": "Kde obvykle dochází k oplození vajíčka spermií?",
+    "options": [
+      "V děloze",
+      "V pochvě",
+      "Ve vejcovodu",
+      "Na povrchu vaječníku"
+    ],
+    "answer": "Ve vejcovodu",
+    "explanation": "K oplození dochází nejčastěji v horní třetině vejcovodu, odkud pak rýhující se vajíčko putuje do dělohy."
+  },
+  {
+    "id": 7,
+    "question": "Jak se nazývá vnitřní výstelka dělohy, která prochází cyklickými změnami?",
+    "options": [
+      "Myometrium",
+      "Perimetrium",
+      "Endometrium",
+      "Cervix"
+    ],
+    "answer": "Endometrium",
+    "explanation": "Endometrium je sliznice, která během menstruačního cyklu narůstá a v případě neoplození vajíčka se odlučuje."
+  },
+  {
+    "id": 8,
+    "question": "Který hormon primárně stimuluje růst a dozrávání folikulu?",
+    "options": [
+      "Progesteron",
+      "FSH",
+      "Testosteron",
+      "Oxytocin"
+    ],
+    "answer": "FSH",
+    "explanation": "Folikulostimulační hormon (FSH) produkovaný adenohypofýzou řídí první fázi cyklu a růst folikulů."
+  },
+  {
+    "id": 9,
+    "question": "Náhlý vzestup hladiny kterého hormonu vyvolává ovulaci?",
+    "options": [
+      "Estrogenu",
+      "Inhibinu",
+      "Luteinizačního hormonu",
+      "Prolaktinu"
+    ],
+    "answer": "Luteinizačního hormonu",
+    "explanation": "Tzv. LH vrchol nastává zhruba 24–36 hodin před uvolněním vajíčka z folikulu."
+  },
+  {
+    "id": 10,
+    "question": "Co vzniká z prasklého folikulu po ovulaci v luteální fázi?",
+    "options": [
+      "Bílé tělísko",
+      "Žluté tělísko",
+      "Nové vajíčko",
+      "Placenta"
+    ],
+    "answer": "Žluté tělísko",
+    "explanation": "Corpus luteum (žluté tělísko) vzniká pod vlivem LH a začíná produkovat progesteron."
+  },
+  {
+    "id": 11,
+    "question": "Jaká je hlavní funkce progesteronu v druhé polovině cyklu?",
+    "options": [
+      "Vyvolání menstruačního krvácení",
+      "Stimulace další ovulace",
+      "Příprava endometria na nidaci (uhnízdění) vajíčka",
+      "Zvýšení pohyblivosti spermií"
+    ],
+    "answer": "Příprava endometria na nidaci (uhnízdění) vajíčka",
+    "explanation": "Progesteron zklidňuje děložní svalovinu a zvyšuje sekreci žlázek v endometriu pro přijetí embrya."
+  },
+  {
+    "id": 12,
+    "question": "Jak dlouho průměrně přežívají spermie v těle ženy?",
+    "options": [
+      "Pouze 12 hodin",
+      "24 hodin",
+      "3–5 dní",
+      "14 dní"
+    ],
+    "answer": "3–5 dní",
+    "explanation": "Díky příznivému prostředí v děložním hrdle a děloze mohou spermie na vajíčko 'počkat' i několik dní."
+  },
+  {
+    "id": 13,
+    "question": "Která struktura v mužském těle zajišťuje optimální teplotu pro vývoj spermií?",
+    "options": [
+      "Semenné váčky",
+      "Šourek",
+      "Penis",
+      "Prostata"
+    ],
+    "answer": "Šourek",
+    "explanation": "Pro správnou spermatogenezi je potřeba teplota o 2–3 °C nižší, než je teplota v břišní dutině."
+  },
+  {
+    "id": 14,
+    "question": "Jaká tekutina tvoří největší objem ejakulátu a vyživuje spermie fruktózou?",
+    "options": [
+      "Sekret prostaty",
+      "Moč",
+      "Sekret semenných váčků",
+      "Lymfa"
+    ],
+    "answer": "Sekret semenných váčků",
+    "explanation": "Semenné váčky produkují až 70 % objemu ejakulátu, tekutina je alkalická a bohatá na zdroje energie pro spermie."
+  },
+  {
+    "id": 15,
+    "question": "Který hormon potlačuje imunitu ženy v luteální fázi, aby tělo neodmítlo embryo?",
+    "options": [
+      "Estrogen",
+      "Adrenalin",
+      "Progesteron",
+      "Inzulín"
+    ],
+    "answer": "Progesteron",
+    "explanation": "Progesteron má imunosupresivní účinky, což se může projevovat i vedlejšími příznaky jako je zbystřený čich."
+  },
+  {
+    "id": 16,
+    "question": "Jak se nazývá proces uvolnění zralého vajíčka z vaječníku?",
+    "options": [
+      "Menstruace",
+      "Ovulace",
+      "Kopulace",
+      "Laktace"
+    ],
+    "answer": "Ovulace",
+    "explanation": "Ovulace nastává obvykle kolem 14. dne cyklu a vajíčko je při ní nasáto třásněmi vejcovodu."
+  },
+  {
+    "id": 17,
+    "question": "Který z orgánů produkuje zásaditý sekret chránící spermie před kyselým prostředím pochvy?",
+    "options": [
+      "Varle",
+      "Nadvarle",
+      "Předstojná žláza",
+      "Močový měchýř"
+    ],
+    "answer": "Předstojná žláza",
+    "explanation": "Sekret prostaty neutralizuje kyselé pH v pochvě, které by jinak spermie rychle zahubilo."
+  }
+]
