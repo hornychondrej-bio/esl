@@ -1,0 +1,13 @@
+## Express your opinion
+- Homework should be banned entirely, students need some free time  
+- AI should be allowed during exams, in real life, we will have it too  
+- Fast fashion should be banned to stop pollution and child labor  
+- There should be at least 5 lessons of PE per week, young people need to move more  
+- We should wear school uniforms to reduce inequality and promote a school spirit  
+- At least one-third of school lessons should be for self-study  
+- Practical skills (such as communication, problem-solving, and critical thinking) should be graded more than factual knowledge  
+- Single-use plastic products should be banned unless they are needed for medical reasons  
+- Influencers should have to disclose who gives them money if they advertise products  
+- Social media should be banned for children under 15, it can damage their self-esteem and build addiction  
+- The minimal voting age should be reduced to 16, young people are often more informed than older people  
+- Students have too many tests, there should be one big test per semester to prepare them for maturita
