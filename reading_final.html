@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📚 Čteme si! - Čtení pro malé čtenáře</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fce4ec 0%, #e8eaf6 50%, #e0f7fa 100%);
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    text-align: center;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header h1 {
+    font-size: 2.2em;
+    font-weight: 900;
+    background: linear-gradient(135deg, #e91e63, #9c27b0, #3f51b5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 5px;
+  }
+
+  .header .subtitle {
+    font-size: 1em;
+    color: #7c4dff;
+    font-weight: 600;
+  }
+
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .toggle-label {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: #666;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: #e0e0e0;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .toggle-switch.active {
+    background: #9c27b0;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .toggle-switch.active::after {
+    transform: translateX(24px);
+  }
+
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin: 15px 0;
+  }
+
+  .stat-item {
+    background: white;
+    border-radius: 20px;
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    font-weight: 700;
+    font-size: 1.1em;
+    transition: transform 0.3s;
+  }
+
+  .stat-item:hover { transform: scale(1.05); }
+  .stat-item .stat-icon { font-size: 1.4em; }
+  .stat-item.streak { color: #ff5722; }
+  .stat-item.points { color: #ffc107; }
+  .stat-item.emojis { color: #4caf50; }
+
+  .card {
+    background: white;
+    border-radius: 30px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    margin: 10px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #e91e63, #ff9800, #4caf50, #2196f3, #9c27b0);
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  .text-label {
+    font-size: 0.85em;
+    color: #9c27b0;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .reading-text {
+    font-size: 1.45em;
+    line-height: 1.9;
+    color: #333;
+    font-weight: 600;
+    padding: 20px;
+    background: linear-gradient(135deg, #fff9c4, #fff3e0);
+    border-radius: 20px;
+    border: 3px dashed #ffc107;
+    margin-bottom: 20px;
+    animation: fadeInUp 0.5s ease;
+    transition: all 0.3s ease;
+  }
+
+  .reading-text.shrunk {
+    font-size: 1.15em;
+    line-height: 1.6;
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  .reading-text .emoji-deco {
+    font-size: 1.3em;
+    margin-right: 10px;
+  }
+
+  .read-btn {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #9c27b0, #673ab7);
+    color: white;
+    font-size: 1.3em;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+    margin-top: 5px;
+  }
+
+  .read-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(156, 39, 176, 0.5);
+  }
+
+  .read-btn:active { transform: translateY(0); }
+
+  .question-area {
+    animation: fadeInUp 0.5s ease;
+    margin-top: 10px;
+  }
+
+  .question-text {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #3f51b5;
+    margin-bottom: 15px;
+    padding: 12px 16px;
+    background: #e8eaf6;
+    border-radius: 15px;
+    border-left: 4px solid #3f51b5;
+  }
+
+  .answers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .answer-btn {
+    padding: 15px 20px;
+    border: 3px solid #e0e0e0;
+    border-radius: 15px;
+    background: white;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Nunito', sans-serif;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .answer-btn:hover {
+    border-color: #9c27b0;
+    background: #f3e5f5;
+    transform: translateX(5px);
+  }
+
+  .answer-btn.correct {
+    border-color: #4caf50;
+    background: #e8f5e9;
+    animation: bounce 0.5s;
+  }
+
+  .answer-btn.wrong {
+    border-color: #f44336;
+    background: #ffebee;
+    animation: shake 0.5s;
+  }
+
+  .answer-btn .answer-letter {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9em;
+    flex-shrink: 0;
+  }
+
+  .answer-btn.correct .answer-letter { background: #4caf50; color: white; }
+  .answer-btn.wrong .answer-letter { background: #f44336; color: white; }
+
+  .reset-section {
+    text-align: center;
+    padding: 30px 0;
+    margin-top: 20px;
+  }
+
+  .reset-btn {
+    padding: 12px 30px;
+    border: 2px solid #e0e0e0;
+    border-radius: 15px;
+    background: white;
+    color: #999;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.3s;
+  }
+
+  .reset-btn:hover {
+    border-color: #f44336;
+    color: #f44336;
+    background: #ffebee;
+  }
+
+  .celebration {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .celebration-text {
+    font-size: 3em;
+    font-weight: 900;
+    color: #4caf50;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    animation: popIn 0.5s ease, fadeOut 0.5s ease 1.5s forwards;
+  }
+
+  .emoji-unlock {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 30px;
+    padding: 30px 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    z-index: 200;
+    text-align: center;
+    animation: popIn 0.5s ease;
+    border: 4px solid #ffc107;
+  }
+
+  .emoji-unlock .big-emoji {
+    font-size: 4em;
+    animation: bounce 1s infinite;
+  }
+
+  .emoji-unlock .unlock-text {
+    font-size: 1.3em;
+    font-weight: 800;
+    color: #333;
+    margin: 10px 0;
+  }
+
+  .emoji-unlock .unlock-sub {
+    font-size: 0.9em;
+    color: #666;
+  }
+
+  .emoji-unlock button {
+    margin-top: 15px;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 15px;
+    background: #ffc107;
+    color: #333;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .collection-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+    z-index: 50;
+    transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .collection-btn:hover { transform: scale(1.1); }
+
+  .collection-panel {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s;
+  }
+
+  .collection-content {
+    background: white;
+    border-radius: 30px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    text-align: center;
+  }
+
+  .collection-content h2 {
+    font-size: 1.5em;
+    color: #9c27b0;
+    margin-bottom: 15px;
+  }
+
+  .emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+  }
+
+  .emoji-slot {
+    width: 55px;
+    height: 55px;
+    border-radius: 15px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8em;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s;
+    justify-self: center;
+  }
+
+  .emoji-slot.unlocked {
+    background: linear-gradient(135deg, #fff9c4, #fff3e0);
+    border-color: #ffc107;
+  }
+
+  .emoji-slot.locked {
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+
+  .close-btn {
+    padding: 10px 30px;
+    border: none;
+    border-radius: 15px;
+    background: #e0e0e0;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    margin-top: 10px;
+  }
+
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    z-index: 150;
+    animation: confettiFall 3s ease-in forwards;
+    pointer-events: none;
+  }
+
+  /* Uppercase mode */
+  .uppercase-mode .reading-text,
+  .uppercase-mode .question-text,
+  .uppercase-mode .answer-btn span:not(.answer-letter) {
+    text-transform: uppercase;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes popIn {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    70% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; transform: scale(0.5); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+
+  @keyframes confettiFall {
+    0% { top: -10px; opacity: 1; transform: rotate(0deg); }
+    100% { top: 110vh; opacity: 0; transform: rotate(720deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  .streak-fire {
+    animation: pulse 0.5s ease;
+    display: inline-block;
+  }
+
+  .timer-hint {
+    text-align: center;
+    color: #999;
+    font-size: 0.85em;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.6em; }
+    .reading-text { font-size: 1.2em; padding: 15px; }
+    .reading-text.shrunk { font-size: 1.05em; padding: 12px; }
+    .card { padding: 20px; }
+    .stat-item { padding: 6px 12px; font-size: 0.95em; }
+    .emoji-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>📚 Čteme si!</h1>
+    <div class="subtitle">Přečti si příběh a odpověz na otázku 🌟</div>
+    <div class="toggle-container">
+      <span class="toggle-label">VELKÁ PÍSMENA</span>
+      <div class="toggle-switch" id="uppercase-toggle" onclick="toggleUppercase()"></div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item streak">
+      <span class="stat-icon">🔥</span>
+      <span id="streak-count">0</span>
+    </div>
+    <div class="stat-item points">
+      <span class="stat-icon">⭐</span>
+      <span id="points-count">0</span>
+    </div>
+    <div class="stat-item emojis">
+      <span class="stat-icon">🎁</span>
+      <span id="emoji-count">0</span>/<span id="emoji-total">10</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div class="text-label">📖 Přečti si text:</div>
+    <div class="reading-text" id="reading-text">
+      <span class="emoji-deco" id="text-emoji">🐱</span>
+      <span id="text-content">Načítám...</span>
+    </div>
+
+    <button class="read-btn" id="read-btn" onclick="showQuestion()">
+      ✅ Přečetl/a jsem!
+    </button>
+
+    <div id="question-phase" class="hidden">
+      <div class="question-area">
+        <div class="text-label">❓ Otázka:</div>
+        <div class="question-text" id="question-text"></div>
+        <div class="answers" id="answers-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reset-section">
+    <button class="reset-btn" onclick="resetProgress()">🔄 Resetovat pokrok</button>
+  </div>
+</div>
+
+<button class="collection-btn" onclick="showCollection()" title="Moje sbírka">🏆</button>
+
+<div id="celebration-container"></div>
+<div id="emoji-unlock-container"></div>
+<div id="collection-container"></div>
+
+<script>
+// Reading texts - correct answer is ALWAYS at index 0 in the answers array
+const readingData = [
+  {
+    emoji: "🐱",
+    text: "Honza má kočičku Mínu. Mína je šedá a má zelené oči. Ráda spí na gauči a honí klubíčko. Honza ji krmí každý den.",
+    question: "Jak se jmenuje Honzova kočička?",
+    answers: ["Mína", "Bella", "Kiki"]
+  },
+  {
+    emoji: "🐶",
+    text: "Pepík má pejska Rexe. Rex je velký a hnědý. Rád běhá v parku a honí míček. Pepík s ním chodí na procházku každé odpoledne.",
+    question: "Kdo chodí s Rexem na procházku?",
+    answers: ["Pepík", "Honza", "Tomáš"]
+  },
+  {
+    emoji: "🌸",
+    text: "Anička má na zahradě krásné květiny. Růžičky jsou červené a voní. Včelky přilétají a sbírají med. Anička zalévá květiny každý den.",
+    question: "Kdo zalévá květiny?",
+    answers: ["Anička", "Honza", "Babička"]
+  },
+  {
+    emoji: "🐟",
+    text: "Tomáš má rybičku Nema. Nemo žije v akváriu a má oranžové proužky. Plave mezi rostlinami. Tomáš ho krmí každé ráno.",
+    question: "Kdo má rybičku Nema?",
+    answers: ["Tomáš", "Honza", "Pepík"]
+  },
+  {
+    emoji: "🌞",
+    text: "Dnes svítí sluníčko a je krásný den. Honza a Anička si hrají na hřišti. Honza honí míč a Anička skáče přes švihadlo. Jsou veselí.",
+    question: "Co dělá Anička na hřišti?",
+    answers: ["Skáče přes švihadlo", "Honí míč", "Sedí na lavičce"]
+  },
+  {
+    emoji: "🍎",
+    text: "V košíku jsou červená jablka. Jsou sladká a voňavá. Maminka upekla jablkový koláč. Celá kuchyně voní skořicí. Honza má hlad.",
+    question: "Co maminka upekla?",
+    answers: ["Jablkový koláč", "Chleba", "Sušenky"]
+  },
+  {
+    emoji: "🐰",
+    text: "Anička má králíčka Pušíka. Pušík má dlouhé uši a měkkou srst. Má rád mrkvičky a hopká po zahradě. Anička ho má moc ráda.",
+    question: "Co má králíček Pušík rád?",
+    answers: ["Mrkvičky", "Maso", "Ryby"]
+  },
+  {
+    emoji: "🌧️",
+    text: "Venku prší a kapky padají na okno. Lukáš si oblékl žlutou pláštěnku a vzal deštník. Skáče do kaluží a směje se. Má mokré boty.",
+    question: "Jakou barvu má Lukášova pláštěnka?",
+    answers: ["Žlutou", "Modrou", "Červenou"]
+  },
+  {
+    emoji: "🐦",
+    text: "Na stromě sedí malý ptáček. Je modrý a zpívá krásnou písničku. Honza se na něj dívá z okna. Ptáček si staví hnízdo z větviček.",
+    question: "Z čeho ptáček staví hnízdo?",
+    answers: ["Z větviček", "Z papíru", "Z kamení"]
+  },
+  {
+    emoji: "🎂",
+    text: "Dnes má Eliška narozeniny. Je jí sedm let. Maminka upekla dort se svíčkami. Eliška dostala dárek - novou knížku. Všichni jí zpívají.",
+    question: "Kolik je Elišce let?",
+    answers: ["Sedm", "Pět", "Deset"]
+  },
+  {
+    emoji: "🐸",
+    text: "U rybníka žije žabka. Je zelená a má velké oči. Skáče z leknínu na leknín. Pepík ji pozoruje a říká jí Skákavka. Večer kváká.",
+    question: "Jakou barvu má žabka?",
+    answers: ["Zelenou", "Modrou", "Hnědou"]
+  },
+  {
+    emoji: "🌙",
+    text: "Je večer a na nebi svítí měsíc. Hvězdy blikají jako malé lampičky. Matyáš si lehl do postele a maminka mu čte pohádku. Brzy usne.",
+    question: "Kdo čte Matyášovi pohádku?",
+    answers: ["Maminka", "Tatínek", "Babička"]
+  },
+  {
+    emoji: "🐻",
+    text: "V knížce je medvídek Púda. Má rád med a chodí do lesa. Je hnědý a tlustý. Rád se tulí k Kamarádovi. V zimě spí v jeskyni.",
+    question: "Kde medvídek spí v zimě?",
+    answers: ["V jeskyni", "V domě", "Na stromě"]
+  },
+  {
+    emoji: "🚂",
+    text: "Vlak jede po kolejích a píská. Hou, hou! Vagony jsou červené a modré. Vlak veze lidi do města. Honza se dívá z okna a mává.",
+    question: "Jaké barvy jsou vagony?",
+    answers: ["Červené a modré", "Zelené a žluté", "Bílé a černé"]
+  },
+  {
+    emoji: "🦋",
+    text: "Na louce létá motýl Mája. Má krásná oranžová křídla s černými tečkami. Létá z květiny na květinu a pije nektar. Anička se na něj dívá.",
+    question: "Co motýl Mája pije?",
+    answers: ["Nektar", "Vodu", "Mléko"]
+  },
+  {
+    emoji: "⛄",
+    text: "Napadl sníh a děti staví sněhuláka. Má mrkvový nos a uhlíkové oči. Na hlavě má starý klobouk. Honza a Pepík jsou šťastní.",
+    question: "Z čeho má sněhulák nos?",
+    answers: ["Z mrkve", "Z kamene", "Z dřeva"]
+  },
+  {
+    emoji: "🐝",
+    text: "Včelka Bzučí letí do zahrady. Sbírá pyl z kvítků a nosí ho do úlu. Je žlutá s černými proužky. Dělá sladký med pro všechny.",
+    question: "Jaká je včelka Bzučí?",
+    answers: ["Žlutá s černými proužky", "Zelená s bílými tečkami", "Modrá se žlutými proužky"]
+  },
+  {
+    emoji: "🏠",
+    text: "Domeček stojí na kopci. Má červenou střechu a bílé zdi. Okolo rostou stromy a keře. Bydlí tam rodina - maminka, tatínek a Honza.",
+    question: "Jakou barvu má střecha domečku?",
+    answers: ["Červenou", "Modrou", "Zelenou"]
+  },
+  {
+    emoji: "🐢",
+    text: "Tomáš má želvu Pomalku. Želva nosí svůj domeček na zádech. Chodí pomalu po zahradě a má zelenou schránku. Když se bojí, schová se.",
+    question: "Co nosí želva na zádech?",
+    answers: ["Svůj domeček", "Batoh", "Kámen"]
+  },
+  {
+    emoji: "🎈",
+    text: "Na obloze létá červený balónek. Vítr ho nese vysoko nad mraky. Balónek vidí řeky, hory a města. Pak pomalu klesá dolů. Honza ho pozoruje.",
+    question: "Co nese balónek vysoko?",
+    answers: ["Vítr", "Pták", "Dítě"]
+  },
+  {
+    emoji: "🐴",
+    text: "Kůň Rychlík běhá po louce. Je hnědý a má dlouhou hřívu. Rád jí seno a pije vodu z potoka. Pepík ho chodí hladit každý den.",
+    question: "Co kůň Rychlík rád jí?",
+    answers: ["Seno", "Trávu", "Oves"]
+  },
+  {
+    emoji: "🍌",
+    text: "Opice Čiči sedí na palmě. Má hnědou srst a dlouhý ocas. Ráda jí banány a houpe se na větvích. Je velmi rychlá a veselá. Honza se jí směje.",
+    question: "Co opice Čiči ráda jí?",
+    answers: ["Banány", "Jablka", "Rýži"]
+  },
+  {
+    emoji: "🐘",
+    text: "Slon Bobo je velký a šedý. Má dlouhý chobot a velké uši. Rád se koupe v řece. Stříká na sebe vodu a je šťastný. Anička se na něj dívá.",
+    question: "Jakou barvu má slon Bobo?",
+    answers: ["Šedou", "Hnědou", "Bílou"]
+  },
+  {
+    emoji: "🌻",
+    text: "Na poli rostou slunečnice. Jsou vysoké a mají velké žluté květy. Otočí se vždy za sluníčkem. Včely na nich sedí a sbírají pyl.",
+    question: "Za čím se slunečnice otočí?",
+    answers: ["Za sluníčkem", "Za větrem", "Za deštěm"]
+  },
+  {
+    emoji: "🐧",
+    text: "Tučňák Pingu žije na ledu. Je černý na zádech a bílý na břiše. Rád se klouže po břiše na ledu. Skáče do studené vody a plave. Lukáš se směje.",
+    question: "Jak se Pingu klouže po ledu?",
+    answers: ["Na břiše", "Na nohou", "Na zádech"]
+  },
+  {
+    emoji: "🦁",
+    text: "Lev Rex má velkou hřívu kolem hlavy. Je králem zvířat. Rád spí na slunci a odpočívá. Když zavrčí, všichni se ho bojí. Honza o něm četl v knize.",
+    question: "Kdo je králem zvířat?",
+    answers: ["Lev", "Tygr", "Slon"]
+  },
+  {
+    emoji: "🍓",
+    text: "Na záhoně rostou jahody. Jsou červené, sladké a voňavé. Babička je trhá do košíku. Z jahod uvaří marmeládu. Celý dům voní.",
+    question: "Co babička z jahod uvaří?",
+    answers: ["Marmeládu", "Polévku", "Koláč"]
+  },
+  {
+    emoji: "🐌",
+    text: "Šnek Šuplík leze po listu. Má hnědou ulitu a měkké tělo. Leze pomalu a zanechává za sebou stříbrnou stopu. Anička se na něj dívá.",
+    question: "Co šnek zanechává za sebou?",
+    answers: ["Stříbrnou stopu", "Černou stopu", "Zelenou stopu"]
+  },
+  {
+    emoji: "🏫",
+    text: "Děti jdou ráno do školy. Mají batohy a svačiny. Ve škole se učí číst a psát. Paní učitelka vypráví pohádku. Honza a Anička pozorně poslouchají.",
+    question: "Co paní učitelka dělá?",
+    answers: ["Vypráví pohádku", "Zpívá písničku", "Kreslí na tabuli"]
+  },
+  {
+    emoji: "🎄",
+    text: "Vánoce jsou tu! V obýváku stojí velký stromeček. Je ozdobený koulemi a světýlky. Pod stromečkem jsou dárky. Celá rodina se raduje.",
+    question: "Co je pod stromečkem?",
+    answers: ["Dárky", "Hračky", "Jídlo"]
+  },
+  {
+    emoji: "🐷",
+    text: "Prase Růžovka žije na statku. Je růžová a má stočený ocásek. Ráda leží v bahně. Dostává nažrat z koryta a je spokojená. Pepík ji pozoruje.",
+    question: "Kde prase Růžovka ráda leží?",
+    answers: ["V bahně", "Na slámě", "Ve vodě"]
+  },
+  {
+    emoji: "🌈",
+    text: "Po dešti vyšlo sluníčko. Na obloze je krásná duha. Má sedm barev. Honza a Anička se dívají nahoru a počítají barvy. Je to moc hezké.",
+    question: "Kdy se objeví duha?",
+    answers: ["Po dešti", "V noci", "Před deštěm"]
+  },
+  {
+    emoji: "🐔",
+    text: "Slepička Kvíčí bydlí v kurníku. Každé ráno snese vejce. Má peří a zobáček. Zobá zrní na dvoře. Kohout zpívá ráno kokrhá.",
+    question: "Co slepička dělá každé ráno?",
+    answers: ["Snese vejce", "Zpívá", "Spí"]
+  },
+  {
+    emoji: "🍕",
+    text: "Tatínek dělá pizzu. Na těsto dá rajčatovou omáčku, sýr a salám. Pizza voní v troubě. Celá rodina se těší na večeři. Honza má hlad.",
+    question: "Co tatínek dává na pizzu?",
+    answers: ["Omáčku, sýr a salám", "Čokoládu a ovoce", "Rýži a maso"]
+  },
+  {
+    emoji: "🦆",
+    text: "Na rybníce plavou kachničky. Mají hnědé peří a oranžový zobák. Kachna vede svá káčátka do vody. Káčátka pípají a plavou za maminkou.",
+    question: "Jakou barvu mají kachničky zobák?",
+    answers: ["Oranžovou", "Červenou", "Žlutou"]
+  },
+  {
+    emoji: "🚗",
+    text: "Tatínek myje auto před domem. Auto je modré a lesklé. Tatínek ho myje hadicí a houbou. Pak auto vyleští hadříkem. Pepík pomáhá.",
+    question: "Jakou barvu má auto?",
+    answers: ["Modrou", "Červenou", "Zelenou"]
+  },
+  {
+    emoji: "🐿️",
+    text: "Veverka Zrzka žije na velkém dubu. Má zrzavý kožíšek a huňatý ocas. Skáče po větvích a hledá žaludy. Na zimu si schovává oříšky. Anička ji viděla.",
+    question: "Co si veverka schovává na zimu?",
+    answers: ["Oříšky", "Jablka", "Houby"]
+  },
+  {
+    emoji: "🎪",
+    text: "Cirkus přijel do města. Velký stan je červený a žlutý. V cirkuse vystupuje klaun. Dělá legraci a děti se smějí. Honza a Tomáš tam byli.",
+    question: "Jakou barvu má cirkusový stan?",
+    answers: ["Červený a žlutý", "Modrý a zelený", "Bílý a černý"]
+  },
+  {
+    emoji: "🌼",
+    text: "Na louce rostou pampelišky. Jsou žluté jako malá sluníčka. Děti je trhají a dělají z nich věnečky. Včely na nich sedí a bzučí. Anička si ho dala do vlasů.",
+    question: "Jakou barvu mají pampelišky?",
+    answers: ["Žlutou", "Bílou", "Růžovou"]
+  },
+  {
+    emoji: "🌊",
+    text: "Rodina jela k moři na dovolenou. Moře je modré a velké. Honza a Anička staví hrady z písku. Máma a táta se opalují na dece. Všichni jsou šťastní.",
+    question: "Co děti staví na pláži?",
+    answers: ["Hrady z písku", "Sněhuláka", "Domeček ze dřeva"]
+  },
+  {
+    emoji: "🐿️",
+    text: "Veverka a zajíček jsou kamarádi. Bydlí v lese. Každý den se spolu hrají. Veverka sbírá oříšky a zajíček jí mrkvičku. V zimě pomáhají sobě navzájem.",
+    question: "Kdo bydlí v lese?",
+    answers: ["Veverka a zajíček", "Kočka a pes", "Ryba a pták"]
+  },
+  {
+    emoji: "🎵",
+    text: "Anička hraje na klavír. Učí se novou písničku. Klavír stojí v obýváku. Anička cvičí každý den. Maminka ráda poslouchá její hraní.",
+    question: "Na co Anička hraje?",
+    answers: ["Na klavír", "Na kytaru", "Na housle"]
+  },
+  {
+    emoji: "🐶",
+    text: "Štěně Fík je malé a veselé. Má hnědé uši a černý nos. Rád kouše boty a honí se s míčkem. Pepík ho má moc rád. V noci spí v košíku.",
+    question: "Kde štěně Fík spí?",
+    answers: ["V košíku", "V posteli", "Na zahradě"]
+  },
+  {
+    emoji: "🍦",
+    text: "V létě je horko. Děti chtějí zmrzlinu. Maminka koupí tři kopečky - čokoládovou, vanilkovou a jahodovou. Honza a Anička ji jedí v parku na lavičce.",
+    question: "Kolik kopečků maminka koupí?",
+    answers: ["Tři", "Dva", "Čtyři"]
+  },
+  {
+    emoji: "🦉",
+    text: "Sova Bydli bydlí v dutině starého stromu. Je hnědá s velkýma očima. Létá v noci a loví myši. Ve dne spí a odpočívá na větvi. Lukáš ji slyšel.",
+    question: "Kdy sova létá a loví?",
+    answers: ["V noci", "Ráno", "V poledne"]
+  },
+  {
+    emoji: "🚲",
+    text: "Pepík se učí jezdit na kole. Má červené kolo s bílými pruhy. Tatínek mu drží sedlo, aby nespadl. Pepík šlape do pedálů a směje se.",
+    question: "Jakou barvu má Pepíkovo kolo?",
+    answers: ["Červenou", "Modrou", "Zelenou"]
+  },
+  {
+    emoji: "🐞",
+    text: "Beruška sedí na květině. Je červená s černými tečkami. Má šest malých nožiček. Bereška jí mšely a pomáhá zahradě. Anička se na ni dívá.",
+    question: "Co beruška jí?",
+    answers: ["Mšely", "Květiny", "Listy"]
+  },
+  {
+    emoji: "🎃",
+    text: "Na podzim dýně rostou na poli. Jsou velké a oranžové. Honza a Tomáš z dýně vydlabou semínka a vyřežou obličej. Svítí pak jako lucerna.",
+    question: "Jakou barvu mají dýně?",
+    answers: ["Oranžovou", "Zelenou", "Žlutou"]
+  },
+  {
+    emoji: "🦩",
+    text: "Čáp bílý stojí v mokřadu. Má dlouhé nohy a dlouhý zobák. Chytá ryby a žáby. Na jaře si staví velké hnízdo na komíně domu. Honza ho viděl.",
+    question: "Kde si čáp staví hnízdo?",
+    answers: ["Na komíně", "Na stromě", "Na zemi"]
+  },
+  {
+    emoji: "🎨",
+    text: "Pepík rád maluje. Má barvy - červenou, modrou a žlutou. Na papíře nakreslí dům, strom a sluníčko. Obrázek dá mamince na ledničku.",
+    question: "Kam Pepík dá obrázek?",
+    answers: ["Na ledničku", "Do školy", "Na zeď"]
+  },
+  {
+    emoji: "🐭",
+    text: "Myška Píšťalka žije v malém domečku pod podlahou. Je šedá a má dlouhý ocásek. V noci vylézá a hledá sýr. Bojí se velké kočky.",
+    question: "Kde myška bydlí?",
+    answers: ["Pod podlahou", "Na stromě", "V krabici"]
+  },
+  {
+    emoji: "🌺",
+    text: "Babička má krásnou zahradu. Rostou tam růže, tulipány a narcisy. Babička zahradu ráno zalévá. Motýli létají z květu na květ. Anička pomáhá.",
+    question: "Kdy babička zahradu zalévá?",
+    answers: ["Ráno", "V poledne", "Večer"]
+  },
+  {
+    emoji: "🦊",
+    text: "Liška Bystrouška je chytrá a červená. Žije v noře v lese. V noci chodí na louku a hledá jídlo. Má huňatý ocas a špičaté uši. Tomáš ji viděl.",
+    question: "Kde liška bydlí?",
+    answers: ["V noře", "Na stromě", "V domě"]
+  },
+  {
+    emoji: "🍫",
+    text: "Anička a Honza si dělají horkou čokoládu. Do hrnku dají mléko a kakao. Přidají cukr a míchají lžičkou. Čokoláda je teplá a sladká. Pijí ji v zimě.",
+    question: "Co přidají do čokolády?",
+    answers: ["Cukr", "Sůl", "Pepř"]
+  },
+  {
+    emoji: "🐦",
+    text: "V parku Honza a Anička krmí kachničky. Házejí jim chleba k vodě. Kachny plavou k břehu a zobou drobky. Káčátka plavou za maminkou v řadě.",
+    question: "Co děti dávají kachnám?",
+    answers: ["Chleba", "Jablka", "Rýži"]
+  },
+  {
+    emoji: "🐱",
+    text: "Kočka Mína má pět koťátek. Koťátka jsou malá a měkká. Pijí mléko od maminky. Honza se na ně dívá a říká, že jsou roztomilá. Mína je spokojená.",
+    question: "Kolik koťátek má kočka Mína?",
+    answers: ["Pět", "Tři", "Sedm"]
+  },
+  {
+    emoji: "🍒",
+    text: "Na zahradě rostou třešně. Jsou červené a sladké. Pepík leze na strom a trhá je. Dává si je do pusy a je mu moc dobře. Maminka udělá kompot.",
+    question: "Co maminka z třešní udělá?",
+    answers: ["Kompot", "Koláč", "Zavařeninu"]
+  },
+  {
+    emoji: "🐸",
+    text: "Na zahradě je malé jezírko. V jezírku žijí ryby a žáby. Honza tam chodí a pozoruje je. Žáby skáčou a ryby plavou. Je tam ticho a klid.",
+    question: "Co žije v jezírku?",
+    answers: ["Ryby a žáby", "Ptáci a včely", "Kočky a psi"]
+  },
+  {
+    emoji: "🌾",
+    text: "Na poli roste pšenice. Je zlatá a vysoká. Pán kombajnem sklízí obilí. Z obilí se mele mouka. Z mouky se peče chleba. Honza měl sendvič k snídani.",
+    question: "Co se mele z obilí?",
+    answers: ["Mouka", "Cukr", "Sůl"]
+  },
+  {
+    emoji: "🐝",
+    text: "Včelka Bzučí letí z květu na květ. Sbírá pyl a dělá z něj med. Med je sladký a zdravý. Tomáš si dává med na chleba každý den k snídani.",
+    question: "Co si Tomáš dává na chleba?",
+    answers: ["Med", "Marmeládu", "Sýr"]
+  },
+  {
+    emoji: "🦜",
+    text: "Papoušek Kiki umí mluvit. Je zelený a červený. Sedí na bidýlku v kuchyni. Opakuje slova, která slyší. Anička mu říká ahoj a Kiki to zopakuje.",
+    question: "Jakou barvu má papoušek Kiki?",
+    answers: ["Zelený a červený", "Modrý a žlutý", "Oranžový a bílý"]
+  },
+  {
+    emoji: "🐦",
+    text: "Veverka a ptáček se kamarádí. Veverka sbírá oříšky na zimu. Ptáček zpívá na stromě. Společně bydlí v lese a pomáhají si. Honza je pozoroval.",
+    question: "Co dělá ptáček na stromě?",
+    answers: ["Zpívá", "Spí", "Jí"]
+  },
+  {
+    emoji: "🌸",
+    text: "Jaro je tady! Stromy se zelenají a květiny kvetou. Ptáčci se vracejí z teplých zemí. Anička a Honza jdou na procházku do parku. Je krásně.",
+    question: "Kam jdou Anička a Honza?",
+    answers: ["Do parku", "Do školy", "Do obchodu"]
+  },
+  {
+    emoji: "🍂",
+    text: "Na podzim padá listí ze stromů. Listy jsou žluté, červené a hnědé. Pepík sbírá listí a dělá z něj hromadu. Pak do ní skočí a listí létá.",
+    question: "Co Pepík dělá z listí?",
+    answers: ["Dělá hromadu a skáče do ní", "Jí ho", "Zalévá ho"]
+  }
+];
+
+const emojiRewards = [
+  { streak: 1, emoji: "⭐", name: "Hvězdička" },
+  { streak: 3, emoji: "🦋", name: "Motýlek" },
+  { streak: 5, emoji: "🌈", name: "Duha" },
+  { streak: 7, emoji: "🦄", name: "Jednorožec" },
+  { streak: 10, emoji: "👑", name: "Koruna" },
+  { streak: 15, emoji: "🏆", name: "Pohár" },
+  { streak: 20, emoji: "💎", name: "Diamant" },
+  { streak: 25, emoji: "🚀", name: "Raketa" },
+  { streak: 30, emoji: "🌟", name: "Super hvězda" },
+  { streak: 40, emoji: "🎪", name: "Cirkus" }
+];
+
+let state = {
+  streak: 0,
+  bestStreak: 0,
+  points: 0,
+  unlockedEmojis: [],
+  currentTextIndex: 0,
+  usedTexts: [],
+  answered: false,
+  uppercaseMode: false
+};
+
+// Local variable for current correct answer index (not persisted)
+let currentCorrectIndex = 0;
+
+function loadState() {
+  const saved = localStorage.getItem('ctemeSiState_v2');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    state.streak = parsed.streak || 0;
+    state.bestStreak = parsed.bestStreak || 0;
+    state.points = parsed.points || 0;
+    state.unlockedEmojis = parsed.unlockedEmojis || [];
+    state.usedTexts = parsed.usedTexts || [];
+    state.uppercaseMode = parsed.uppercaseMode || false;
+  }
+}
+
+function saveState() {
+  localStorage.setItem('ctemeSiState_v2', JSON.stringify({
+    streak: state.streak,
+    bestStreak: state.bestStreak,
+    points: state.points,
+    unlockedEmojis: state.unlockedEmojis,
+    usedTexts: state.usedTexts,
+    uppercaseMode: state.uppercaseMode
+  }));
+}
+
+// Fisher-Yates shuffle
+function shuffleArray(arr) {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function init() {
+  loadState();
+  updateStats();
+  applyUppercaseMode();
+  loadNewText();
+  document.getElementById('emoji-total').textContent = emojiRewards.length;
+}
+
+function toggleUppercase() {
+  state.uppercaseMode = !state.uppercaseMode;
+  applyUppercaseMode();
+  saveState();
+}
+
+function applyUppercaseMode() {
+  const toggle = document.getElementById('uppercase-toggle');
+  if (state.uppercaseMode) {
+    document.body.classList.add('uppercase-mode');
+    toggle.classList.add('active');
+  } else {
+    document.body.classList.remove('uppercase-mode');
+    toggle.classList.remove('active');
+  }
+}
+
+function resetProgress() {
+  if (confirm('Opravdu chceš smazat veškerý pokrok? Tato akce je nevratná.')) {
+    localStorage.removeItem('ctemeSiState_v2');
+    state = {
+      streak: 0,
+      bestStreak: 0,
+      points: 0,
+      unlockedEmojis: [],
+      currentTextIndex: 0,
+      usedTexts: [],
+      answered: false,
+      uppercaseMode: state.uppercaseMode // Keep uppercase preference
+    };
+    saveState();
+    updateStats();
+    loadNewText();
+  }
+}
+
+function loadNewText() {
+  if (state.usedTexts.length >= readingData.length) {
+    state.usedTexts = [];
+  }
+
+  let available = readingData.map((_, i) => i).filter(i => !state.usedTexts.includes(i));
+  let pick = available[Math.floor(Math.random() * available.length)];
+
+  state.currentTextIndex = pick;
+  state.usedTexts.push(pick);
+  state.answered = false;
+
+  const item = readingData[pick];
+  document.getElementById('text-emoji').textContent = item.emoji;
+  document.getElementById('text-content').textContent = item.text;
+
+  // Reset to reading phase
+  document.getElementById('reading-text').classList.remove('shrunk');
+  document.getElementById('read-btn').classList.remove('hidden');
+  document.getElementById('question-phase').classList.add('hidden');
+
+  const progress = (state.usedTexts.length / readingData.length) * 100;
+  document.getElementById('progress-fill').style.width = progress + '%';
+
+  saveState();
+}
+
+function showQuestion() {
+  if (state.answered) return;
+
+  const item = readingData[state.currentTextIndex];
+
+  // The correct answer is always at index 0 in the data
+  const correctAnswer = item.answers[0];
+  const wrongAnswers = item.answers.slice(1);
+
+  // Create array with all answers and shuffle
+  const allAnswers = [correctAnswer, ...wrongAnswers];
+  const shuffled = shuffleArray(allAnswers);
+
+  // Find where the correct answer ended up after shuffle
+  currentCorrectIndex = shuffled.indexOf(correctAnswer);
+
+  // Shrink the text area so question is visible alongside
+  document.getElementById('reading-text').classList.add('shrunk');
+  document.getElementById('read-btn').classList.add('hidden');
+
+  // Show question
+  document.getElementById('question-text').textContent = item.question;
+
+  const container = document.getElementById('answers-container');
+  container.innerHTML = '';
+
+  const letters = ['A', 'B', 'C'];
+  shuffled.forEach((answer, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = `<span class="answer-letter">${letters[i]}</span><span>${answer}</span>`;
+    btn.onclick = () => checkAnswer(i, btn);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('question-phase').classList.remove('hidden');
+}
+
+function checkAnswer(selected, btn) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const allBtns = document.querySelectorAll('.answer-btn');
+
+  if (selected === currentCorrectIndex) {
+    // Correct!
+    btn.classList.add('correct');
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    state.points += 10 + (state.streak * 2);
+
+    showCelebration();
+    createConfetti();
+    checkEmojiUnlock();
+
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+    setTimeout(() => {
+      updateStats();
+      saveState();
+      loadNewText();
+    }, 2000);
+  } else {
+    // Wrong
+    btn.classList.add('wrong');
+    allBtns[currentCorrectIndex].classList.add('correct');
+
+    state.streak = 0;
+
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+    setTimeout(() => {
+      updateStats();
+      saveState();
+      loadNewText();
+    }, 2500);
+  }
+}
+
+function showCelebration() {
+  const container = document.getElementById('celebration-container');
+  const messages = ['Správně! 🎉', 'Výborně! 🌟', 'Super! ⭐', 'Paráda! 🎊', 'Jsi skvělý/á! 💪', 'Úžasné! 🏆'];
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+
+  const div = document.createElement('div');
+  div.className = 'celebration';
+  div.innerHTML = `<div class="celebration-text">${msg}</div>`;
+  container.appendChild(div);
+
+  setTimeout(() => div.remove(), 2000);
+}
+
+function checkEmojiUnlock() {
+  for (const reward of emojiRewards) {
+    if (state.streak >= reward.streak && !state.unlockedEmojis.includes(reward.emoji)) {
+      state.unlockedEmojis.push(reward.emoji);
+      showEmojiUnlock(reward);
+      break;
+    }
+  }
+}
+
+function showEmojiUnlock(reward) {
+  const container = document.getElementById('emoji-unlock-container');
+  const div = document.createElement('div');
+  div.className = 'emoji-unlock';
+  div.innerHTML = `
+    <div class="big-emoji">${reward.emoji}</div>
+    <div class="unlock-text">Nový odznak: ${reward.name}!</div>
+    <div class="unlock-sub">Série ${reward.streak} správných odpovědí 🔥</div>
+    <button onclick="this.parentElement.remove()">Super! 🎉</button>
+  `;
+  container.appendChild(div);
+  createConfetti();
+}
+
+function createConfetti() {
+  const colors = ['#e91e63', '#9c27b0', '#3f51b5', '#4caf50', '#ffc107', '#ff9800', '#00bcd4'];
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (Math.random() * 10 + 5) + 'px';
+    piece.style.height = (Math.random() * 10 + 5) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    piece.style.animationDelay = (Math.random() * 0.5) + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 4000);
+  }
+}
+
+function updateStats() {
+  document.getElementById('streak-count').textContent = state.streak;
+  document.getElementById('points-count').textContent = state.points;
+  document.getElementById('emoji-count').textContent = state.unlockedEmojis.length;
+
+  const streakEl = document.querySelector('.stat-item.streak');
+  if (state.streak >= 3) {
+    streakEl.querySelector('.stat-icon').innerHTML = '<span class="streak-fire">🔥</span>';
+  } else {
+    streakEl.querySelector('.stat-icon').textContent = '🔥';
+  }
+}
+
+function showCollection() {
+  const container = document.getElementById('collection-container');
+  let html = `
+    <div class="collection-panel" onclick="if(event.target===this)this.remove()">
+      <div class="collection-content">
+        <h2>🏆 Moje sbírka odznaků</h2>
+        <p style="color:#666;margin-bottom:10px;">Nejlepší série: <strong>${state.bestStreak}</strong> 🔥</p>
+        <p style="color:#666;margin-bottom:15px;">Celkem bodů: <strong>${state.points}</strong> ⭐</p>
+        <div class="emoji-grid">
+  `;
+
+  emojiRewards.forEach(reward => {
+    const unlocked = state.unlockedEmojis.includes(reward.emoji);
+    html += `
+      <div class="emoji-slot ${unlocked ? 'unlocked' : 'locked'}" title="${reward.name} - série ${reward.streak}">
+        ${unlocked ? reward.emoji : '🔒'}
+      </div>
+    `;
+  });
+
+  html += `
+        </div>
+        <button class="close-btn" onclick="document.getElementById('collection-container').innerHTML=''">Zavřít</button>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+init();
+</script>
+</body>
+</html>
+
