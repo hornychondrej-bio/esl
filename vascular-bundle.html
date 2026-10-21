@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vascular bundle simulation</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b1220;color:#e6edf7;
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+#labels{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;white-space:nowrap;font-size:12px;padding:2px 8px 2px 6px;border-radius:10px;
+  background:rgba(10,18,32,.78);border:1px solid rgba(255,255,255,.2);pointer-events:auto;cursor:pointer;will-change:transform;display:none}
+.lbl span{color:#e6edf7}
+.lbl i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:currentColor;vertical-align:baseline}
+.lbl[data-g=xylem]{color:#6fc3ff}.lbl[data-g=phloem]{color:#c9ef7a}.lbl[data-g=comp]{color:#2fd6a3}
+.lbl[data-g=scl]{color:#e0a85f}.lbl.end{pointer-events:none;border-style:dashed;color:#8aa0c0}
+#panel{position:fixed;left:10px;top:10px;width:290px;max-height:calc(100% - 20px);overflow:auto;padding:12px 14px 14px;
+  border-radius:14px;background:rgba(12,20,36,.88);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px)}
+#panel h1{font-size:16px;margin:0;line-height:1.25}
+#panel h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8aa0c0;margin:14px 0 6px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.hint{font-size:12px;color:#9fb2cf;margin:6px 0 0}
+.lang button{padding:2px 7px;font-size:11px}
+button{font:inherit;color:#e6edf7;background:#1b2a47;border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:6px 10px;cursor:pointer}
+button:hover{background:#243659}button.on{background:#7a3b1d;border-color:#ff8a5c}
+.lang button.on{background:#1f4f86;border-color:#5ec8ff}
+.row{display:flex;gap:6px;flex-wrap:wrap}.row button{flex:1 1 auto}
+label.radio,label.chk{display:flex;align-items:center;gap:7px;margin:3px 0;cursor:pointer}
+.sl{margin:8px 0 2px}.sl label{display:block;font-size:12px;color:#b8c7de}
+input[type=range]{width:100%;accent-color:#5ec8ff;margin:2px 0}
+.meter{margin:8px 0;font-size:12px;color:#b8c7de}.meter b{float:right;color:#e6edf7}
+.bar{clear:both;height:7px;background:#1d2a44;border-radius:4px;position:relative;overflow:hidden;margin-top:3px}
+.bar::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:#5b6f92}
+.bar i{position:absolute;top:0;bottom:0;left:50%;width:0;background:#ff8a5c}
+.leg{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;font-size:12px;color:#b8c7de;margin-top:4px}
+.leg span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--c)}
+#btnTour{width:100%;margin-top:12px;background:#1f4f86;border-color:#5ec8ff}
+#info{position:fixed;right:10px;bottom:10px;width:min(400px,calc(100% - 20px));padding:12px 14px;border-radius:14px;display:none;
+  background:rgba(12,20,36,.92);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(6px)}
+#info h2{font-size:15px;margin:0 22px 6px 0}#info p{margin:0;color:#cbd7ea;font-size:13.5px}
+#bClose{position:absolute;right:8px;top:6px;padding:0 8px;font-size:18px;line-height:24px;background:none;border:none;color:#9fb2cf}
+#tourNav{display:none;align-items:center;justify-content:space-between;margin-top:10px}#tourCount{font-size:12px;color:#8aa0c0}
+#status{position:fixed;right:10px;top:10px;max-width:min(400px,calc(100% - 70px));padding:9px 12px;border-radius:12px;display:none;
+  background:rgba(90,30,20,.92);border:1px solid #ff8a5c;font-size:13px}
+#tip{position:fixed;pointer-events:none;display:none;padding:3px 8px;border-radius:8px;font-size:12px;background:rgba(10,18,32,.92);border:1px solid rgba(255,255,255,.25)}
+#err{position:fixed;left:50%;top:40%;transform:translateX(-50%);max-width:min(520px,90%);padding:14px 16px;border-radius:12px;
+  background:rgba(12,20,36,.95);border:1px solid rgba(255,255,255,.2);text-align:center;font-size:14px}
+#err.bad{border-color:#ff8a5c;color:#ffd7c9}
+#pt{position:fixed;left:10px;top:10px;z-index:5;display:none;padding:4px 10px;font-size:16px}
+@media (max-width:820px){
+  #pt{display:block}
+  #panel{top:52px;width:260px;font-size:12.5px;max-height:calc(100% - 62px)}
+  body.nopanel #panel{display:none}
+  #info{width:calc(100% - 20px)}
+  #status{top:10px;left:60px;right:10px;max-width:none}
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<div id="tip"></div>
+<div id="err">Loading 3D engine…</div>
+<button id="pt" title="Panel">☰</button>
+
+<div id="panel">
+  <div class="top"><h1 data-i18n="title">Vascular bundle in action</h1>
+    <div class="lang row"><button data-lang="en" class="on">EN</button><button data-lang="cs">CS</button></div></div>
+  <p class="hint" data-i18n="hint"></p>
+
+  <h3 data-i18n="secForces"></h3>
+  <label class="radio"><input type="radio" name="mode" value="push"><span data-i18n="modePush"></span></label>
+  <label class="radio"><input type="radio" name="mode" value="pull" checked><span data-i18n="modePull"></span></label>
+  <div class="sl"><label for="sStrength" data-i18n="strength"></label><input id="sStrength" type="range" min="0" max="100" value="60"></div>
+  <div class="sl"><label for="sSugar" data-i18n="sugar"></label><input id="sSugar" type="range" min="0" max="100" value="60"></div>
+  <div class="sl"><label for="sSpeed" data-i18n="speed"></label><input id="sSpeed" type="range" min="10" max="200" value="100"></div>
+  <div class="meter"><span data-i18n="xp"></span><b id="xpVal"></b><div class="bar"><i id="xpBar"></i></div></div>
+  <div class="meter"><span data-i18n="pp"></span><b id="ppVal"></b><div class="bar"><i id="ppBar" style="background:#c9ef7a"></i></div></div>
+  <div class="leg">
+    <span style="--c:#2f9bff" data-i18n="legWater"></span>
+    <span style="--c:#ffb020" data-i18n="legMin"></span>
+    <span style="--c:#ff5fa8" data-i18n="legSugar"></span>
+    <span style="--c:#6ff0ff" data-i18n="legOsm"></span>
+    <span style="--c:#ff6b4a" data-i18n="legArrow"></span>
+  </div>
+
+  <h3 data-i18n="secWhat"></h3>
+  <div class="row"><button id="btnSupport"></button></div>
+  <div class="row" style="margin-top:6px"><button id="btnComp"></button></div>
+
+  <h3 data-i18n="secView"></h3>
+  <div class="row"><button id="btn3d" data-i18n="v3d"></button><button id="btnTop" data-i18n="vTop"></button><button id="btnSide" data-i18n="vSide"></button></div>
+  <div class="row" style="margin-top:6px"><button id="btnPause"></button></div>
+
+  <h3 data-i18n="secShow"></h3>
+  <label class="chk"><input type="checkbox" id="cbXylem" checked><span data-i18n="cbXylem"></span></label>
+  <label class="chk"><input type="checkbox" id="cbPhloem" checked><span data-i18n="cbPhloem"></span></label>
+  <label class="chk"><input type="checkbox" id="cbComp" checked><span data-i18n="cbComp"></span></label>
+  <label class="chk"><input type="checkbox" id="cbScl" checked><span data-i18n="cbScl"></span></label>
+  <label class="chk"><input type="checkbox" id="cbPart" checked><span data-i18n="cbPart"></span></label>
+  <label class="chk"><input type="checkbox" id="cbLabels" checked><span data-i18n="cbLabels"></span></label>
+  <label class="chk"><input type="checkbox" id="cbCut"><span data-i18n="cbCut"></span></label>
+
+  <button id="btnTour" data-i18n="tour"></button>
+</div>
+
+<div id="status"></div>
+<div id="info">
+  <button id="bClose" aria-label="close">×</button>
+  <h2 id="infoTitle"></h2><p id="infoText"></p>
+  <div id="tourNav"><button id="bPrev" data-i18n="prev"></button><span id="tourCount"></span><button id="bNext" data-i18n="next"></button></div>
+</div>
+
+<script>
+/* =====================================================================
+   Vascular bundle simulation  (three.js r147, plain JavaScript)
+   Everything the students read is in the TXT object just below —
+   you can edit the wording (English / Czech) without touching the rest.
+   ===================================================================== */
+function startVB() {
+'use strict';
+
+var H = 10, TOP = H / 2, BOT = -H / 2, PI = Math.PI;
+
+/* ============================ TEXTS ============================ */
+var TXT = {
+en: {
+ ui: {
+  title: 'Vascular bundle in action',
+  hint: 'Drag to rotate · scroll to zoom · click any part for an explanation.',
+  secForces: 'Driving forces',
+  modePush: 'Root pressure (pushes from below)',
+  modePull: 'Transpiration pull (pulls from above)',
+  strength: 'Xylem push / pull strength',
+  sugar: 'Sugar loading (pumps)',
+  speed: 'Simulation speed',
+  xp: 'Xylem pressure (approx.)',
+  pp: 'Phloem pressure (approx.)',
+  legWater: 'water', legMin: 'mineral ions', legSugar: 'sucrose',
+  legOsm: 'water entering by osmosis', legArrow: 'load on vessel wall',
+  secShow: 'Show',
+  cbXylem: 'Xylem (vessels)', cbPhloem: 'Phloem (sieve tubes)', cbComp: 'Companion cells',
+  cbScl: 'Sclerenchyma fibres', cbPart: 'Moving particles', cbLabels: 'Labels',
+  cbCut: 'Cutaway (look inside)',
+  secView: 'View', v3d: '3D', vTop: 'Cross-section', vSide: 'Lengthwise',
+  pause: 'Pause', play: 'Play',
+  secWhat: 'What if…?',
+  noSupport: 'Remove lignin + sclerenchyma', yesSupport: 'Restore lignin + sclerenchyma',
+  noComp: 'Remove companion cells', yesComp: 'Restore companion cells',
+  tour: 'Guided tour', prev: '◀ Back', next: 'Next ▶', close: 'Close',
+  stCollapse: 'Without support the vessels collapse under tension and the flow almost stops.',
+  stBulge: 'Without support the vessels bulge under pressure and could burst.',
+  stNoComp: 'Sieve tubes have no nucleus and no pumps of their own. Without companion cells, loading stops and the flow fades.'
+ },
+ lab: {
+  lXylem: 'Xylem vessel', lPhloem: 'Sieve tube', lComp: 'Companion cell',
+  lScl: 'Sclerenchyma fibre', lPump: 'H⁺/ATP pumps', lLignin: 'Lignin thickening',
+  lPlate: 'Sieve plate', lPlasmo: 'Plasmodesmata',
+  lTop: '▲ Leaf (source, transpiration)', lBot: '▼ Root (sink, water uptake)'
+ },
+ info: {
+  xylem: ['Xylem vessel: water and minerals go UP',
+   'Dead, hollow, open-ended cells stacked into long pipes. Sap rises from the roots to the leaves. It is pushed from below by root pressure and, above all, pulled from above by evaporation in the leaves (transpiration), because water molecules stick together (cohesion). The vessel itself uses no energy: this is passive transport.'],
+  lignin: ['Lignin thickening',
+   'Rings (or spirals) of lignin reinforce the vessel wall like the hoops of a hose. Under tension (negative pressure) the wall is pulled inwards and would collapse; under positive root pressure it is pushed outwards. Lignin keeps the pipe round and watertight.'],
+  scl: ['Sclerenchyma fibres: the skeleton of the bundle',
+   'Dead cells with extremely thick, lignified walls form a sheath around the bundle (strongest as a cap over the phloem). They hold the xylem in shape against the pressure differences, resist bending and give the stem its strength. Note the tiny lumen: the wall is almost the whole cell.'],
+  phloem: ['Sieve tube: sugar goes DOWN (and wherever it is needed)',
+   'Living cells joined end to end and perforated by sieve plates. Sugar made in the leaves (the source) is loaded in, water follows by osmosis, and a high pressure builds up. The sap is pushed towards the roots or growing tips (the sinks), where the sugar is unloaded and the pressure drops. This is the pressure-flow hypothesis.'],
+  plate: ['Sieve plate',
+   'A perforated end wall between two sieve-tube cells. The pores let the sap stream through while the cell stays alive. Sieve tubes have lost their nucleus and most organelles to make room for the flow.'],
+  comp: ['Companion cell: the sister that keeps the sieve tube alive',
+   'Each sieve-tube cell has a small, dense sister cell with a nucleus, many mitochondria and ribosomes. It makes the ATP and the proteins that the sieve tube lacks, and it does the active work of loading sugar. The two cells are linked by many plasmodesmata.'],
+  pump: ['Proton pumps and sugar loading',
+   'Pumps in the companion-cell membrane use ATP to push H⁺ ions out. The H⁺ gradient then drags sucrose into the cell (co-transport), and from there it moves into the sieve tube. Active loading raises the sugar concentration, so water enters by osmosis and the pressure rises.'],
+  plasmo: ['Plasmodesmata',
+   'Tiny channels through the cell walls connect the cytoplasm of the companion cell with the sieve tube, so sugar and signalling molecules can pass between them.']
+ },
+ tour: [
+  ['The big picture', 'A vascular bundle is a two-way road. The xylem (blue) carries water and minerals up, the phloem (green) carries sugar down, and the sclerenchyma (brown) is the armour around them. Rotate the model, then press Next.'],
+  ['Xylem: water up', 'Hollow dead vessels form pipes from the root to the leaf. Water (blue) and minerals (orange) rise together. Raise the strength slider and watch the flow speed up.'],
+  ['What drives the flow?', 'Pushing: roots pump mineral ions into the xylem, water follows by osmosis and the sap is pushed up (arrows point outwards). Now switch to transpiration pull, the main driver: evaporation from the leaf pulls the water column like a rope, the pressure becomes negative and the arrows point inwards.'],
+  ['Armour for the xylem', 'Under strong tension the vessel walls are pulled inwards. Lignin rings and the thick-walled sclerenchyma fibres around the bundle (they glow as the load rises) keep the pipes from collapsing. Try the button "Remove lignin + sclerenchyma".'],
+  ['Phloem: sugar down', 'Sieve tubes are living cells with sieve plates. Sugar (pink) loaded in the leaf draws water in by osmosis. The pressure that builds up pushes the sap towards the root, where the sugar is unloaded.'],
+  ['Sister cells', 'Each sieve tube is served by a companion cell. Its mitochondria make ATP for the proton pumps (yellow) that load the sugar, and plasmodesmata connect the two cells. Try "Remove companion cells": the flow fades, because the sieve tube cannot manage alone.'],
+  ['Comparison', 'Xylem: dead cells, one direction (up), passive transport driven mainly by transpiration (and root pressure). Phloem: living cells, from source to sink, active loading, driven by turgor pressure. The sclerenchyma holds the whole bundle together.']
+ ]
+},
+cs: {
+ ui: {
+  title: 'Cévní svazek v akci',
+  hint: 'Tažením otáčíte · kolečkem přibližujete · kliknutím na část zobrazíte vysvětlení.',
+  secForces: 'Hnací síly',
+  modePush: 'Kořenový tlak (tlačí zdola)',
+  modePull: 'Transpirační tah (táhne shora)',
+  strength: 'Síla tlaku / tahu v xylému',
+  sugar: 'Nakládání cukrů (pumpy)',
+  speed: 'Rychlost simulace',
+  xp: 'Tlak v xylému (přibližně)',
+  pp: 'Tlak ve floému (přibližně)',
+  legWater: 'voda', legMin: 'minerální ionty', legSugar: 'sacharóza',
+  legOsm: 'voda vstupující osmózou', legArrow: 'zatížení stěny cévy',
+  secShow: 'Zobrazit',
+  cbXylem: 'Xylém (cévy)', cbPhloem: 'Floém (sítkovice)', cbComp: 'Průvodní buňky',
+  cbScl: 'Sklerenchymatická vlákna', cbPart: 'Pohybující se částice', cbLabels: 'Popisky',
+  cbCut: 'Řez (pohled dovnitř)',
+  secView: 'Pohled', v3d: '3D', vTop: 'Příčný řez', vSide: 'Podélný pohled',
+  pause: 'Pozastavit', play: 'Spustit',
+  secWhat: 'Co kdyby…?',
+  noSupport: 'Odebrat lignin a sklerenchym', yesSupport: 'Vrátit lignin a sklerenchym',
+  noComp: 'Odebrat průvodní buňky', yesComp: 'Vrátit průvodní buňky',
+  tour: 'Výklad krok za krokem', prev: '◀ Zpět', next: 'Další ▶', close: 'Zavřít',
+  stCollapse: 'Bez výztuhy se cévy vlivem podtlaku zhroutí a proud téměř ustane.',
+  stBulge: 'Bez výztuhy se cévy vlivem tlaku vyboulí a mohly by prasknout.',
+  stNoComp: 'Sítkovice nemají vlastní jádro ani pumpy. Bez průvodních buněk se nakládání cukrů zastaví a proud slábne.'
+ },
+ lab: {
+  lXylem: 'Céva xylému', lPhloem: 'Sítkovice', lComp: 'Průvodní buňka',
+  lScl: 'Sklerenchymatické vlákno', lPump: 'Protonové pumpy (ATP)', lLignin: 'Ligninové ztluštění',
+  lPlate: 'Sítková ploténka', lPlasmo: 'Plazmodesmy',
+  lTop: '▲ List (zdroj, transpirace)', lBot: '▼ Kořen (příjemce, příjem vody)'
+ },
+ info: {
+  xylem: ['Céva xylému: voda a minerální látky putují NAHORU',
+   'Mrtvé, duté buňky bez příčných přepážek, spojené do dlouhých trubic. Míza stoupá z kořenů do listů. Zdola ji tlačí kořenový tlak a hlavně ji shora táhne výpar z listů (transpirace), protože molekuly vody drží pohromadě (koheze). Céva sama žádnou energii nespotřebovává: jde o pasivní transport.'],
+  lignin: ['Ligninové ztluštění',
+   'Prstence (nebo spirály) ligninu vyztužují stěnu cévy podobně jako obruče hadici. Při podtlaku se stěna tahá dovnitř a hrozilo by zhroucení, při kladném kořenovém tlaku ji naopak tlačí ven. Lignin drží trubici kulatou a těsnou.'],
+  scl: ['Sklerenchymatická vlákna: kostra svazku',
+   'Mrtvé buňky s mimořádně tlustými zdřevnatělými stěnami tvoří kolem svazku pochvu (nejsilnější jako čepička nad floémem). Drží xylém v tvaru navzdory rozdílům tlaku, odolávají ohybu a dávají stonku pevnost. Všimněte si nepatrného lumenu: téměř celou buňku tvoří stěna.'],
+  phloem: ['Sítkovice: cukry proudí DOLŮ (a kamkoli jsou potřeba)',
+   'Živé buňky spojené za sebou a provrtané sítkovými ploténkami. Cukry vzniklé v listech (zdroj) se nakládají dovnitř, voda je následuje osmózou a vzniká vysoký tlak. Míza je tlačena ke kořenům nebo vegetačním vrcholům (příjemcům), kde se cukry vykládají a tlak klesá. Je to hypotéza tlakového toku.'],
+  plate: ['Sítková ploténka',
+   'Perforovaná příčná stěna mezi dvěma články sítkovice. Póry propouštějí proud mízy a buňka přitom zůstává živá. Sítkovice přišly o jádro a většinu organel, aby uvolnily místo pro proud.'],
+  comp: ['Průvodní buňka: sestra, která drží sítkovici při životě',
+   'Ke každému článku sítkovice přiléhá malá, hustá sesterská buňka s jádrem, množstvím mitochondrií a ribozomů. Vyrábí ATP a bílkoviny, které sítkovici chybí, a koná aktivní práci při nakládání cukrů. Obě buňky spojuje množství plazmodesmat.'],
+  pump: ['Protonové pumpy a nakládání cukrů',
+   'Pumpy v membráně průvodní buňky vypuzují za spotřeby ATP ionty H⁺. Gradient H⁺ pak vtahuje sacharózu do buňky (kotransport) a odtud přechází do sítkovice. Aktivní nakládání zvyšuje koncentraci cukrů, voda proto vniká osmózou a tlak roste.'],
+  plasmo: ['Plazmodesmy',
+   'Drobné kanálky v buněčných stěnách spojují cytoplazmu průvodní buňky se sítkovicí, takže mezi nimi mohou procházet cukry i signální molekuly.']
+ },
+ tour: [
+  ['Celkový pohled', 'Cévní svazek je silnice pro dva směry. Xylém (modře) vede vodu a minerální látky nahoru, floém (zeleně) vede cukry dolů a sklerenchym (hnědě) tvoří pevný pancíř kolem nich. Otáčejte modelem a pak zvolte Další.'],
+  ['Xylém: voda nahoru', 'Mrtvé duté cévy tvoří trubice od kořene až k listu. Voda (modře) a minerální ionty (oranžově) stoupají společně. Zvyšte posuvník síly a sledujte, jak se proud zrychluje.'],
+  ['Co proud žene?', 'Tlačení: kořeny pumpují do xylému minerální ionty, voda za nimi putuje osmózou a míza je tlačena vzhůru (šipky směřují ven). Teď přepněte na transpirační tah, hlavní hnací sílu: výpar z listů táhne vodní sloupec jako lano, tlak je záporný a šipky míří dovnitř.'],
+  ['Pancíř kolem xylému', 'Při silném podtlaku jsou stěny cév tahány dovnitř. Ligninové prstence a tlustostěnná sklerenchymatická vlákna kolem svazku (se stoupajícím zatížením se rozzáří) brání zhroucení trubic. Zkuste tlačítko „Odebrat lignin a sklerenchym“.'],
+  ['Floém: cukry dolů', 'Sítkovice jsou živé buňky se sítkovými ploténkami. Cukry (růžově) nakládané v listu přitahují osmózou vodu. Vzniklý tlak vytlačuje mízu ke kořenům, kde se cukry vykládají.'],
+  ['Sesterské buňky', 'Každou sítkovici obsluhuje průvodní buňka. Její mitochondrie vyrábějí ATP pro protonové pumpy (žlutě), které cukry nakládají, a plazmodesmy obě buňky spojují. Zkuste „Odebrat průvodní buňky“: proud zeslábne, protože sítkovice to sama nezvládne.'],
+  ['Srovnání', 'Xylém: mrtvé buňky, jediný směr (nahoru), pasivní transport poháněný hlavně transpirací (a kořenovým tlakem). Floém: živé buňky, od zdroje k příjemci, aktivní nakládání, pohání jej turgorový tlak. Sklerenchym drží celý svazek pohromadě.']
+ ]
+}
+};
+
+/* ========================= STATE ========================= */
+var S = { mode: 'pull', strength: 0.6, sugar: 0.6, speed: 1, paused: false,
+          support: true, comp: true, cut: false, particles: true, labels: true };
+var lang = (navigator.language || 'en').toLowerCase().indexOf('cs') === 0 ? 'cs' : 'en';
+var focus = null;          // null = everything, or {xylem:1, scl:1 ...}
+var tourIdx = -1;
+var infoKey = null;
+var T = 0;                 // simulation clock
+
+var STEPS = [
+ { focus: null, cam: 'v3d' },
+ { focus: ['xylem'], cam: 'v3d', mode: 'pull', strength: 0.6 },
+ { focus: ['xylem'], cam: 'v3d', mode: 'push', strength: 0.6 },
+ { focus: ['xylem', 'scl'], cam: 'top', mode: 'pull', strength: 0.9 },
+ { focus: ['phloem'], cam: 'v3d', sugar: 0.7 },
+ { focus: ['phloem', 'comp'], cam: 'comp', sugar: 0.8 },
+ { focus: null, cam: 'v3d' }
+];
+
+function $(id) { return document.getElementById(id); }
+function clamp(x, a, b) { return x < a ? a : (x > b ? b : x); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+function sm(t) { return t * t * (3 - 2 * t); }
+
+/* ========================= RENDERER ========================= */
+var canvas = $('c');
+var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1220);
+var camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200);
+camera.position.set(8.5, 6, 12);
+var controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 3;
+controls.maxDistance = 40;
+var tween = null;
+controls.addEventListener('start', function () { tween = null; });   // the user takes over the camera
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+var dl1 = new THREE.DirectionalLight(0xffffff, 0.9); dl1.position.set(5, 10, 7); scene.add(dl1);
+var dl2 = new THREE.DirectionalLight(0x9db4ff, 0.45); dl2.position.set(-6, -4, -7); scene.add(dl2);
+
+var cutPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0.9);   // keeps z <= 0.9
+
+/* ========================= MATERIALS ========================= */
+var reg = { xylem: [], lignin: [], phloem: [], comp: [], scl: [] };
+var fade = { xylem: 1, lignin: 1, phloem: 1, comp: 1, scl: 1 };
+
+function mat(group, params, Type) {
+  Type = Type || THREE.MeshStandardMaterial;
+  var m = new Type(params);
+  m.userData.base = params.opacity === undefined ? 1 : params.opacity;
+  m.transparent = m.userData.base < 1;
+  reg[group].push(m);
+  return m;
+}
+
+var DS = THREE.DoubleSide;
+var M = {
+  vessel: mat('xylem', { color: 0x7fb4e6, opacity: 0.17, side: DS, depthWrite: false, roughness: 0.3 }),
+  lignin: mat('lignin', { color: 0xa0662c, roughness: 0.6 }),
+  arrow:  mat('xylem', { color: 0xff6b4a, roughness: 0.4, emissive: 0x331100 }),
+  sieve:  mat('phloem', { color: 0xc9ef7a, opacity: 0.2, side: DS, depthWrite: false, roughness: 0.4 }),
+  plate:  mat('phloem', { color: 0xf0fbc4, roughness: 0.5, side: DS }),
+  comp:   mat('comp', { color: 0x2fd6a3, opacity: 0.3, side: DS, depthWrite: false, roughness: 0.4 }),
+  cyto:   mat('comp', { color: 0x1fa27c, opacity: 0.35, depthWrite: false, roughness: 0.6 }),
+  nuc:    mat('comp', { color: 0xb388ff, roughness: 0.5 }),
+  mito:   mat('comp', { color: 0xff9f43, roughness: 0.5 }),
+  pump:   mat('comp', { color: 0xffd23f, emissive: 0xffa800, emissiveIntensity: 0.5, roughness: 0.4 }),
+  halo:   mat('comp', { color: 0xffe066, opacity: 0.4, depthWrite: false, blending: THREE.AdditiveBlending }, THREE.MeshBasicMaterial),
+  plasmo: mat('comp', { color: 0xf1f5f9, roughness: 0.5 }),
+  scl:    mat('scl', { color: 0xc99250, emissive: 0xff6a2a, emissiveIntensity: 0.05, roughness: 0.6, side: DS }),
+  sclIn:  mat('scl', { color: 0x9a6a34, emissive: 0xff6a2a, emissiveIntensity: 0.05, roughness: 0.7, side: DS }),
+  lumen:  mat('scl', { color: 0x24160a, roughness: 1, side: THREE.BackSide })
+};
+
+var G = { xylem: new THREE.Group(), phloem: new THREE.Group(), comp: new THREE.Group(), scl: new THREE.Group() };
+for (var gk in G) { scene.add(G[gk]); }
+
+var pick = [];
+var PRI = { pump: 9, plasmo: 8, lignin: 7, plate: 6, scl: 5, comp: 4, phloem: 3, xylem: 2 };
+function addPick(mesh, key, grp) { mesh.userData.key = key; mesh.userData.grp = grp; pick.push(mesh); }
+
+/* ========================= XYLEM ========================= */
+var vessels = [
+  { x: -0.8, z: 0.9,  r: 0.62, spiral: false },
+  { x:  0.8, z: 0.9,  r: 0.62, spiral: false },
+  { x:  0.0, z: 0.15, r: 0.36, spiral: true },
+  { x:  0.0, z: 1.75, r: 0.36, spiral: true }
+];
+
+class Helix extends THREE.Curve {
+  constructor(r, turns) { super(); this.r = r; this.turns = turns; }
+  getPoint(t, target) {
+    target = target || new THREE.Vector3();
+    var a = t * this.turns * PI * 2;
+    return target.set(Math.cos(a) * this.r, BOT + t * H, Math.sin(a) * this.r);
+  }
+}
+
+vessels.forEach(function (v) {
+  v.scale = 1;
+  var g = new THREE.Group();
+  g.position.set(v.x, 0, v.z);
+  v.group = g;
+  G.xylem.add(g);
+  var tube = new THREE.Mesh(new THREE.CylinderGeometry(v.r, v.r, H, 32, 1, true), M.vessel);
+  g.add(tube); addPick(tube, 'xylem', 'xylem');
+  if (v.spiral) {
+    var sp = new THREE.Mesh(new THREE.TubeGeometry(new Helix(v.r, 14), 560, 0.04, 6, false), M.lignin);
+    g.add(sp); addPick(sp, 'lignin', 'lignin');
+  } else {
+    var ringGeo = new THREE.TorusGeometry(v.r, 0.045, 8, 36);
+    ringGeo.rotateX(PI / 2);
+    var n = 18;
+    for (var i = 0; i < n; i++) {
+      var ring = new THREE.Mesh(ringGeo, M.lignin);
+      ring.position.y = BOT + (i + 0.5) * H / n;
+      g.add(ring); addPick(ring, 'lignin', 'lignin');
+    }
+  }
+});
+
+/* ========================= PHLOEM + COMPANION CELLS ========================= */
+var pairs = [
+  { S: { x: -0.7, z: -1.0, r: 0.42 }, C: { x: -1.2, z: -0.61, r: 0.22 }, X: 0, plateY: -4, nucY: 2.7 },
+  { S: { x:  0.7, z: -1.0, r: 0.42 }, C: { x:  1.2, z: -0.61, r: 0.22 }, X: 1, plateY: -3, nucY: 3.4 }
+];
+
+function plateGeometry(r) {
+  var s = new THREE.Shape();
+  s.absarc(0, 0, r, 0, PI * 2, false);
+  var hs = [[0, 0]];
+  for (var i = 0; i < 6; i++) { var a = i / 6 * PI * 2; hs.push([Math.cos(a) * r * 0.58, Math.sin(a) * r * 0.58]); }
+  hs.forEach(function (h) {
+    var p = new THREE.Path();
+    p.absarc(h[0], h[1], r * 0.13, 0, PI * 2, true);
+    s.holes.push(p);
+  });
+  var g = new THREE.ExtrudeGeometry(s, { depth: 0.05, bevelEnabled: false, curveSegments: 20 });
+  g.rotateX(PI / 2);
+  g.translate(0, 0.025, 0);
+  return g;
+}
+var plateGeo = plateGeometry(0.41);
+
+var rndSeed = 7;
+function rnd() { rndSeed = (rndSeed * 9301 + 49297) % 233280; return rndSeed / 233280; }
+var UP = new THREE.Vector3(0, 1, 0);
+var pumps = [];
+
+pairs.forEach(function (p, pi) {
+  /* sieve tube */
+  var g = new THREE.Group();
+  g.position.set(p.S.x, 0, p.S.z);
+  G.phloem.add(g);
+  var tube = new THREE.Mesh(new THREE.CylinderGeometry(p.S.r, p.S.r, H, 32, 1, true), M.sieve);
+  g.add(tube); addPick(tube, 'phloem', 'phloem');
+  for (var y = p.plateY; y < TOP; y += 2) {
+    var pl = new THREE.Mesh(plateGeo, M.plate);
+    pl.position.y = y;
+    g.add(pl); addPick(pl, 'plate', 'phloem');
+  }
+  /* companion cell */
+  var rc = p.C.r;
+  var cg = new THREE.Group();
+  cg.position.set(p.C.x, 0, p.C.z);
+  G.comp.add(cg);
+  var ct = new THREE.Mesh(new THREE.CylinderGeometry(rc, rc, H, 20, 1, true), M.comp);
+  cg.add(ct); addPick(ct, 'comp', 'comp');
+  var cy = new THREE.Mesh(new THREE.CylinderGeometry(rc * 0.72, rc * 0.72, H - 0.1, 16, 1, false), M.cyto);
+  cg.add(cy); addPick(cy, 'comp', 'comp');
+  var nuc = new THREE.Mesh(new THREE.SphereGeometry(rc * 0.55, 16, 12), M.nuc);
+  nuc.scale.set(1, 1.9, 1); nuc.position.y = p.nucY;
+  cg.add(nuc); addPick(nuc, 'comp', 'comp');
+  for (var k = 0; k < 10; k++) {
+    var mi = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), M.mito);
+    var ang = rnd() * PI * 2, rad = rc * 0.45 * Math.sqrt(rnd());
+    mi.scale.set(1, 2, 1);
+    mi.position.set(Math.cos(ang) * rad, BOT + 0.6 + rnd() * (H - 1.2), Math.sin(ang) * rad);
+    cg.add(mi); addPick(mi, 'comp', 'comp');
+  }
+  /* contact point between the two cells, and direction companion -> sieve tube */
+  var dx = p.S.x - p.C.x, dz = p.S.z - p.C.z, len = Math.sqrt(dx * dx + dz * dz);
+  var d = new THREE.Vector3(dx / len, 0, dz / len);
+  var cx = p.C.x + d.x * rc, cz = p.C.z + d.z * rc;
+  var q = new THREE.Quaternion().setFromUnitVectors(UP, d);
+  /* plasmodesmata */
+  [1.4, 2.2, 3.0].forEach(function (yy) {
+    var pd = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.26, 6), M.plasmo);
+    pd.position.set(cx, yy, cz); pd.quaternion.copy(q);
+    G.comp.add(pd); addPick(pd, 'plasmo', 'comp');
+  });
+  /* proton pumps near the loading end (top = leaf) */
+  [3.9, 4.5].forEach(function (yy, j) {
+    var cone = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.2, 10), M.pump);
+    cone.position.set(cx, yy, cz); cone.quaternion.copy(q);
+    G.comp.add(cone); addPick(cone, 'pump', 'comp');
+    var halo = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 10), M.halo);
+    halo.position.copy(cone.position);
+    G.comp.add(halo);
+    pumps.push({ cone: cone, halo: halo, phase: pi * 1.3 + j * 2.1, pos: cone.position.clone() });
+  });
+});
+
+/* ========================= SCLERENCHYMA ========================= */
+var sclPos = [];
+var N1 = 29, i0;                       // inner ring of fibres: a sheath around the whole bundle
+for (i0 = 0; i0 < N1; i0++) {
+  var th = i0 / N1 * PI * 2;
+  sclPos.push([2.25 * Math.cos(th), 0.35 + 2.35 * Math.sin(th)]);
+}
+var N2 = 12;                           // second layer: a thicker cap on the phloem side
+for (i0 = 0; i0 < N2; i0++) {
+  var th2 = PI * 1.17 + i0 / (N2 - 1) * PI * 0.66;
+  sclPos.push([2.7 * Math.cos(th2), 0.35 + 2.9 * Math.sin(th2)]);
+}
+var fibreGeo = new THREE.CylinderGeometry(0.24, 0.24, H, 20, 1, true);
+var lumenGeo = new THREE.CylinderGeometry(0.07, 0.07, H, 10, 1, true);
+var ringOut = new THREE.RingGeometry(0.15, 0.24, 20); ringOut.rotateX(-PI / 2);
+var ringIn = new THREE.RingGeometry(0.07, 0.15, 20);  ringIn.rotateX(-PI / 2);
+sclPos.forEach(function (sp) {
+  var f = new THREE.Group();
+  f.position.set(sp[0], 0, sp[1]);
+  G.scl.add(f);
+  var body = new THREE.Mesh(fibreGeo, M.scl);
+  f.add(body); addPick(body, 'scl', 'scl');
+  var lum = new THREE.Mesh(lumenGeo, M.lumen);
+  f.add(lum);
+  [[TOP + 0.002, 1], [BOT - 0.002, -1]].forEach(function (e) {
+    var ro = new THREE.Mesh(ringOut, M.scl); ro.position.y = e[0]; if (e[1] < 0) ro.rotation.x = PI;
+    var ri = new THREE.Mesh(ringIn, M.sclIn); ri.position.y = e[0] + e[1] * 0.001; if (e[1] < 0) ri.rotation.x = PI;
+    f.add(ro); f.add(ri); addPick(ro, 'scl', 'scl'); addPick(ri, 'scl', 'scl');
+  });
+});
+
+/* ========================= PARTICLES ========================= */
+function spriteTexture() {
+  var c = document.createElement('canvas'); c.width = c.height = 64;
+  var x = c.getContext('2d');
+  var gr = x.createRadialGradient(32, 32, 2, 32, 32, 30);
+  gr.addColorStop(0, 'rgba(255,255,255,1)');
+  gr.addColorStop(0.6, 'rgba(255,255,255,0.9)');
+  gr.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+}
+var SPR = spriteTexture();
+
+function makePoints(n, color, size, grp) {
+  var geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(Math.max(n, 1) * 3), 3));
+  var m = mat(grp, { color: color, size: size, map: SPR, opacity: 0.95, depthWrite: false,
+                     sizeAttenuation: true, alphaTest: 0.02 }, THREE.PointsMaterial);
+  var p = new THREE.Points(geo, m);
+  p.frustumCulled = false;
+  return p;
+}
+
+/* xylem: water + minerals, riding inside each vessel */
+var wRecs = [], mRecs = [];
+vessels.forEach(function (v, vi) {
+  var n = Math.round(v.r * v.r * 100);
+  for (var i = 0; i < n; i++) {
+    var rec = { v: vi, y: BOT + Math.random() * H, a: Math.random() * PI * 2,
+                rf: Math.sqrt(Math.random()) * 0.82, sp: 0.8 + Math.random() * 0.4,
+                w: (Math.random() - 0.5) * 0.8 };
+    (i % 10 < 3 ? mRecs : wRecs).push(rec);
+  }
+});
+var waterP = makePoints(wRecs.length, 0x2f9bff, 0.26, 'xylem');
+var mineP  = makePoints(mRecs.length, 0xffb020, 0.3, 'xylem');
+G.xylem.add(waterP); G.xylem.add(mineP);
+
+/* phloem: sucrose, loaded by the companion cell at the top, flowing down */
+var sRecs = [];
+for (var si = 0; si < 44; si++) {
+  for (var pj = 0; pj < 2; pj++) {
+    sRecs.push({ p: pj, y: BOT + Math.random() * H, a: Math.random() * PI * 2,
+                 rf: Math.sqrt(Math.random()), sp: 0.8 + Math.random() * 0.4 });
+  }
+}
+var sugarP = makePoints(sRecs.length, 0xff5fa8, 0.3, 'phloem');
+G.phloem.add(sugarP);
+
+/* water entering the sieve tube by osmosis near the loading zone */
+var oRecs = [];
+for (var oi = 0; oi < 12; oi++) {
+  for (var op = 0; op < 2; op++) {
+    oRecs.push({ p: op, u: Math.random(), y: 2.8 + Math.random() * 1.8, sp: 0.8 + Math.random() * 0.4 });
+  }
+}
+var osmP = makePoints(oRecs.length, 0x6ff0ff, 0.22, 'phloem');
+G.phloem.add(osmP);
+
+var particleObjs = [waterP, mineP, sugarP, osmP];
+
+/* ========================= LOAD ARROWS ON XYLEM WALLS ========================= */
+var arrows = [];
+(function () {
+  var shaftGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.22, 6);
+  var coneGeo = new THREE.ConeGeometry(0.075, 0.2, 10);
+  var levels = [-3.4, 0.2, 3.6];
+  vessels.forEach(function (v, vi) {
+    var n = v.r > 0.5 ? 6 : 5;
+    levels.forEach(function (y, li) {
+      for (var k = 0; k < n; k++) {
+        var a = (k + li * 0.5) / n * PI * 2;
+        var g = new THREE.Group();
+        var shaft = new THREE.Mesh(shaftGeo, M.arrow); shaft.position.y = 0.11;
+        var cone = new THREE.Mesh(coneGeo, M.arrow);   cone.position.y = 0.3;
+        g.add(shaft); g.add(cone);
+        G.xylem.add(g);
+        arrows.push({ g: g, vi: vi, a: a, y: y });
+      }
+    });
+  });
+})();
+
+/* ========================= HTML LABELS ========================= */
+var labelsEl = $('labels');
+var labels = [];
+function addLabel(key, anchor, grp, info) {
+  var el = document.createElement('div');
+  el.className = 'lbl' + (grp === 'end' ? ' end' : '');
+  el.setAttribute('data-g', grp);
+  el.innerHTML = '<i></i><span></span>';
+  if (info) { el.addEventListener('click', function () { showInfo(info); }); }
+  labelsEl.appendChild(el);
+  labels.push({ el: el, key: key, anchor: anchor, grp: grp, info: info });
+}
+addLabel('lXylem',  new THREE.Vector3(0.8, TOP + 0.1, 0.9),   'xylem',  'xylem');
+addLabel('lLignin', new THREE.Vector3(-1.42, 1.94, 0.9),      'xylem',  'lignin');
+addLabel('lPhloem', new THREE.Vector3(0.7, TOP + 0.1, -1.0),  'phloem', 'phloem');
+addLabel('lPlate',  new THREE.Vector3(-1.12, 2.0, -1.0),      'phloem', 'plate');
+addLabel('lComp',   new THREE.Vector3(1.2, TOP + 0.1, -0.61), 'comp',   'comp');
+addLabel('lPump',   pumps[3].pos.clone(),                     'comp',   'pump');
+addLabel('lScl',    new THREE.Vector3(2.25, TOP + 0.1, 0.35), 'scl',    'scl');
+addLabel('lTop',    new THREE.Vector3(0, TOP + 0.95, 0),      'end',    null);
+addLabel('lBot',    new THREE.Vector3(0, BOT - 0.95, 0),      'end',    null);
+
+/* ========================= CAMERA VIEWS ========================= */
+var VIEWS = {
+  v3d:  { pos: [8.5, 6, 12],      tgt: [0, 0, 0] },
+  top:  { pos: [0, 16.5, 0.4],    tgt: [0, 5, 0.35] },
+  side: { pos: [3.5, 1.2, 16.8],  tgt: [0, 0, 0] },
+  comp: { pos: [3.2, 3.4, 5.8],   tgt: [0.2, 3.4, -0.9] }
+};
+function setView(name) {
+  var v = VIEWS[name]; if (!v) return;
+  tween = { t: 0, p0: camera.position.clone(), t0: controls.target.clone(),
+            p1: new THREE.Vector3(v.pos[0], v.pos[1], v.pos[2]),
+            t1: new THREE.Vector3(v.tgt[0], v.tgt[1], v.tgt[2]) };
+}
+camera.lookAt(0, 0, 0);
+
+function resize() {
+  var w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  var off = w >= 900 ? 130 : 0;               // keep the model clear of the left panel
+  if (off) { camera.setViewOffset(w, h, -off, 0, w, h); } else { camera.clearViewOffset(); }
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ========================= SIMULATION ========================= */
+function vesselFactor(v) {
+  return (!S.support && S.mode === 'pull') ? clamp((v.scale - 0.42) / 0.58, 0.03, 1) : 1;
+}
+
+function simulate(dt) {
+  var spX = 0.05 + 2.4 * S.strength;
+  [[wRecs, waterP], [mRecs, mineP]].forEach(function (pr) {
+    var recs = pr[0], pos = pr[1].geometry.attributes.position.array;
+    for (var i = 0; i < recs.length; i++) {
+      var r = recs[i], v = vessels[r.v];
+      r.y += dt * spX * vesselFactor(v) * r.sp * (1 - 0.6 * r.rf * r.rf);
+      if (r.y > TOP) { r.y -= H; }
+      r.a += dt * r.w;
+      var rr = r.rf * v.r * v.scale;
+      pos[i * 3] = v.x + Math.cos(r.a) * rr;
+      pos[i * 3 + 1] = r.y;
+      pos[i * 3 + 2] = v.z + Math.sin(r.a) * rr;
+    }
+    pr[1].geometry.attributes.position.needsUpdate = true;
+  });
+
+  var sg = S.comp ? S.sugar : 0;
+  var spP = S.comp ? (0.18 + 1.5 * S.sugar) : 0.03;
+  var spos = sugarP.geometry.attributes.position.array;
+  for (var j = 0; j < sRecs.length; j++) {
+    var q = sRecs[j], pp = pairs[q.p];
+    q.y -= dt * spP * q.sp;
+    if (q.y < BOT) { q.y += H; }
+    var u = sm(clamp((TOP - q.y) / 1.5, 0, 1));
+    var cx = lerp(pp.C.x, pp.S.x, u), cz = lerp(pp.C.z, pp.S.z, u);
+    var rad = lerp(pp.C.r * 0.65, pp.S.r * 0.8, u) * q.rf;
+    q.a += dt * 0.3;
+    spos[j * 3] = cx + Math.cos(q.a) * rad;
+    spos[j * 3 + 1] = q.y;
+    spos[j * 3 + 2] = cz + Math.sin(q.a) * rad;
+  }
+  sugarP.geometry.attributes.position.needsUpdate = true;
+  sugarP.geometry.setDrawRange(0, Math.floor(sRecs.length * (S.comp ? 0.3 + 0.7 * S.sugar : 0.2)));
+
+  var opos = osmP.geometry.attributes.position.array;
+  for (var k = 0; k < oRecs.length; k++) {
+    var o = oRecs[k], po = pairs[o.p], vv = vessels[po.X];
+    o.u += dt * (0.3 + 0.5 * sg) * o.sp;
+    if (o.u > 1) { o.u -= 1; }
+    opos[k * 3] = lerp(vv.x, po.S.x, o.u);
+    opos[k * 3 + 1] = o.y;
+    opos[k * 3 + 2] = lerp(vv.z, po.S.z, o.u);
+  }
+  osmP.geometry.attributes.position.needsUpdate = true;
+  osmP.geometry.setDrawRange(0, Math.floor(oRecs.length * (S.comp ? 0.15 + 0.85 * S.sugar : 0.05)));
+}
+
+var xpCache = '', ppCache = '';
+function updateStatic(dt) {
+  var sx = S.strength;
+  /* vessel wall strain */
+  var target;
+  if (S.support) { target = S.mode === 'pull' ? 1 - 0.05 * sx : 1 + 0.035 * sx; }
+  else { target = S.mode === 'pull' ? 1 - 0.55 * (0.25 + 0.75 * sx)
+                                    : 1 + 0.45 * (0.25 + 0.75 * sx) + 0.03 * Math.sin(T * 9); }
+  vessels.forEach(function (v) {
+    v.scale += (target - v.scale) * Math.min(1, dt * 3);
+    v.group.scale.set(v.scale, 1, v.scale);
+  });
+  /* load arrows */
+  var push = S.mode === 'push';
+  M.arrow.color.setHex(push ? 0xff6b4a : 0x5ec8ff);
+  var UPV = UP, dir = new THREE.Vector3();
+  arrows.forEach(function (ar) {
+    var v = vessels[ar.vi], rs = v.r * v.scale;
+    var len = Math.min(0.4 * (0.5 + 0.8 * sx), push ? rs * 0.8 : 0.3);
+    var cs = Math.cos(ar.a), sn = Math.sin(ar.a);
+    var rad = push ? rs - 0.04 - len : rs + 0.03 + len;
+    dir.set(push ? cs : -cs, 0, push ? sn : -sn);
+    ar.g.quaternion.setFromUnitVectors(UPV, dir);
+    ar.g.position.set(v.x + cs * rad, ar.y, v.z + sn * rad);
+    ar.g.scale.setScalar(Math.max(len / 0.4, 0.01));
+    ar.g.visible = sx > 0.03;
+  });
+  /* sclerenchyma glow = load carried */
+  var stress = S.support ? (S.mode === 'pull' ? sx : sx * 0.6) : 0;
+  var glow = 0.05 + 0.7 * stress * (0.75 + 0.25 * Math.sin(T * 3));
+  M.scl.emissiveIntensity = glow; M.sclIn.emissiveIntensity = glow;
+  /* pumps pulse with sugar loading */
+  var sg = S.comp ? S.sugar : 0;
+  pumps.forEach(function (p) {
+    var pulse = 0.5 + 0.5 * Math.sin(T * 6 + p.phase);
+    p.halo.scale.setScalar(1 + 0.6 * pulse * sg);
+  });
+  M.pump.emissiveIntensity = 0.25 + 0.75 * sg * (0.6 + 0.4 * Math.sin(T * 6));
+  /* meters */
+  var xp = push ? 0.05 + 0.15 * sx : -(0.3 + 2.2 * sx);
+  var pp = 0.3 + 1.7 * sg;
+  var xs = (xp >= 0 ? '+' : '−') + Math.abs(xp).toFixed(2) + ' MPa';
+  var ps = '+' + pp.toFixed(2) + ' MPa';
+  if (xs !== xpCache) {
+    xpCache = xs; $('xpVal').textContent = xs;
+    var wdt = Math.min(50, Math.abs(xp) / 2.5 * 50);
+    var xb = $('xpBar');
+    xb.style.width = wdt + '%'; xb.style.left = (xp >= 0 ? 50 : 50 - wdt) + '%';
+    xb.style.background = xp >= 0 ? '#ff8a5c' : '#5ec8ff';
+  }
+  if (ps !== ppCache) {
+    ppCache = ps; $('ppVal').textContent = ps;
+    var pb = $('ppBar');
+    pb.style.width = Math.min(50, pp / 2.5 * 50) + '%'; pb.style.left = '50%';
+  }
+}
+
+/* ========================= FADING / FOCUS ========================= */
+function targetFade(g) {
+  var t = 1, key = g === 'lignin' ? 'xylem' : g;
+  if (focus && !focus[key]) { t = 0.12; }
+  if (g === 'scl' && !S.support) { t = Math.min(t, 0.1); }
+  if (g === 'lignin' && !S.support) { t = 0; }
+  if (g === 'comp' && !S.comp) { t = Math.min(t, 0.14); }
+  return t;
+}
+function stepFade(dt) {
+  for (var g in fade) {
+    fade[g] += (targetFade(g) - fade[g]) * Math.min(1, dt * 5);
+    var f = fade[g];
+    reg[g].forEach(function (m) {
+      var op = m.userData.base * f;
+      if (m.opacity !== op) { m.opacity = op; }
+      var tr = m.userData.base < 1 || f < 0.995;
+      if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; }
+    });
+  }
+}
+function setFocus(list) {
+  if (!list) { focus = null; return; }
+  focus = {};
+  list.forEach(function (k) { focus[k] = 1; });
+}
+
+/* ========================= PICKING ========================= */
+var ray = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+function isShown(o) { while (o) { if (!o.visible) { return false; } o = o.parent; } return true; }
+function pickAt(cx, cy) {
+  var rect = canvas.getBoundingClientRect();
+  mouse.x = ((cx - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((cy - rect.top) / rect.height) * 2 + 1;
+  ray.setFromCamera(mouse, camera);
+  var hits = ray.intersectObjects(pick, false).filter(function (h) {
+    if (!isShown(h.object)) { return false; }
+    if (fade[h.object.userData.grp] < 0.3) { return false; }
+    if (S.cut && h.point.z > cutPlane.constant) { return false; }
+    return true;
+  });
+  if (!hits.length) { return null; }
+  var best = hits[0];
+  hits.forEach(function (h) {
+    if (h.distance <= hits[0].distance + 0.7 && PRI[h.object.userData.key] > PRI[best.object.userData.key]) { best = h; }
+  });
+  return best.object.userData.key;
+}
+var LABKEY = { xylem: 'lXylem', lignin: 'lLignin', scl: 'lScl', phloem: 'lPhloem',
+               plate: 'lPlate', comp: 'lComp', pump: 'lPump', plasmo: 'lPlasmo' };
+
+var downX = 0, downY = 0, tip = $('tip'), hoverQueued = false, lastMove = null;
+canvas.addEventListener('pointerdown', function (e) { downX = e.clientX; downY = e.clientY; });
+canvas.addEventListener('pointerup', function (e) {
+  if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) < 6) {
+    var k = pickAt(e.clientX, e.clientY);
+    if (k) { showInfo(k); }
+  }
+});
+canvas.addEventListener('pointermove', function (e) {
+  lastMove = e;
+  if (e.buttons) { tip.style.display = 'none'; return; }
+  if (hoverQueued) { return; }
+  hoverQueued = true;
+  requestAnimationFrame(function () {
+    hoverQueued = false;
+    var k = pickAt(lastMove.clientX, lastMove.clientY);
+    if (k) {
+      tip.textContent = TXT[lang].lab[LABKEY[k]];
+      tip.style.left = (lastMove.clientX + 14) + 'px';
+      tip.style.top = (lastMove.clientY + 12) + 'px';
+      tip.style.display = 'block';
+      canvas.style.cursor = 'pointer';
+    } else { tip.style.display = 'none'; canvas.style.cursor = 'grab'; }
+  });
+});
+canvas.addEventListener('pointerleave', function () { tip.style.display = 'none'; });
+
+/* ========================= INFO PANEL / TOUR ========================= */
+var tourOverride = false;   // true while a clicked part is shown in the middle of the tour
+function renderInfo() {
+  var box = $('info'), pair;
+  if (infoKey && (tourIdx < 0 || tourOverride)) { pair = TXT[lang].info[infoKey]; }
+  else if (tourIdx >= 0) { pair = TXT[lang].tour[tourIdx]; }
+  else { box.style.display = 'none'; return; }
+  $('infoTitle').textContent = pair[0];
+  $('infoText').textContent = pair[1];
+  $('tourNav').style.display = tourIdx >= 0 ? 'flex' : 'none';
+  if (tourIdx >= 0) { $('tourCount').textContent = (tourIdx + 1) + ' / ' + TXT[lang].tour.length; }
+  box.style.display = 'block';
+}
+/* clicking a part during the tour shows that part; Next / Back return to the tour text */
+function showInfo(key) { infoKey = key; tourOverride = tourIdx >= 0; renderInfo(); }
+function showTourStep(i) {
+  tourIdx = i; tourOverride = false; infoKey = null;
+  var cfg = STEPS[i];
+  setFocus(cfg.focus);
+  if (cfg.mode) { setMode(cfg.mode); }
+  if (cfg.strength !== undefined) { setStrength(cfg.strength); }
+  if (cfg.sugar !== undefined) { setSugar(cfg.sugar); }
+  setView(cfg.cam);
+  renderInfo();
+}
+function endTour() { tourIdx = -1; infoKey = null; tourOverride = false; setFocus(null); renderInfo(); }
+$('bNext').addEventListener('click', function () {
+  if (tourIdx >= TXT[lang].tour.length - 1) { endTour(); } else { showTourStep(tourIdx + 1); }
+});
+$('bPrev').addEventListener('click', function () { showTourStep(Math.max(0, tourIdx - 1)); });
+$('bClose').addEventListener('click', endTour);
+$('btnTour').addEventListener('click', function () {
+  S.support = true; S.comp = true; refreshButtons();
+  showTourStep(0);
+});
+
+/* ========================= CONTROLS ========================= */
+function setMode(m) {
+  S.mode = m;
+  var radios = document.getElementsByName('mode');
+  for (var i = 0; i < radios.length; i++) { radios[i].checked = radios[i].value === m; }
+}
+function setStrength(v) { S.strength = v; $('sStrength').value = Math.round(v * 100); }
+function setSugar(v) { S.sugar = v; $('sSugar').value = Math.round(v * 100); }
+
+var radios = document.getElementsByName('mode');
+for (var ri = 0; ri < radios.length; ri++) {
+  radios[ri].addEventListener('change', function (e) { S.mode = e.target.value; refreshStatus(); });
+}
+$('sStrength').addEventListener('input', function (e) { S.strength = e.target.value / 100; });
+$('sSugar').addEventListener('input', function (e) { S.sugar = e.target.value / 100; });
+$('sSpeed').addEventListener('input', function (e) { S.speed = e.target.value / 100; });
+
+function bindCheck(id, fn) { $(id).addEventListener('change', function (e) { fn(e.target.checked); }); }
+bindCheck('cbXylem', function (c) { G.xylem.visible = c; });
+bindCheck('cbPhloem', function (c) { G.phloem.visible = c; });
+bindCheck('cbComp', function (c) { G.comp.visible = c; });
+bindCheck('cbScl', function (c) { G.scl.visible = c; });
+bindCheck('cbPart', function (c) { S.particles = c; particleObjs.forEach(function (p) { p.visible = c; }); });
+bindCheck('cbLabels', function (c) { S.labels = c; });
+bindCheck('cbCut', function (c) { S.cut = c; renderer.clippingPlanes = c ? [cutPlane] : []; });
+
+$('btn3d').addEventListener('click', function () { setView('v3d'); });
+$('btnTop').addEventListener('click', function () { setView('top'); });
+$('btnSide').addEventListener('click', function () { setView('side'); });
+$('btnPause').addEventListener('click', function () { S.paused = !S.paused; refreshButtons(); });
+$('btnSupport').addEventListener('click', function () { S.support = !S.support; refreshButtons(); refreshStatus(); });
+$('btnComp').addEventListener('click', function () { S.comp = !S.comp; refreshButtons(); refreshStatus(); });
+$('pt').addEventListener('click', function () { document.body.classList.toggle('nopanel'); });
+if (window.innerWidth < 820) { document.body.classList.add('nopanel'); }
+
+function refreshButtons() {
+  var u = TXT[lang].ui;
+  $('btnPause').textContent = S.paused ? u.play : u.pause;
+  $('btnSupport').textContent = S.support ? u.noSupport : u.yesSupport;
+  $('btnComp').textContent = S.comp ? u.noComp : u.yesComp;
+  $('btnSupport').classList.toggle('on', !S.support);
+  $('btnComp').classList.toggle('on', !S.comp);
+}
+function refreshStatus() {
+  var u = TXT[lang].ui, msgs = [];
+  if (!S.support) { msgs.push(S.mode === 'pull' ? u.stCollapse : u.stBulge); }
+  if (!S.comp) { msgs.push(u.stNoComp); }
+  var el = $('status');
+  el.textContent = msgs.join('  ');
+  el.style.display = msgs.length ? 'block' : 'none';
+}
+
+/* ========================= LANGUAGE ========================= */
+function applyLang() {
+  document.documentElement.lang = lang;
+  var nodes = document.querySelectorAll('[data-i18n]');
+  for (var i = 0; i < nodes.length; i++) {
+    var k = nodes[i].getAttribute('data-i18n');
+    if (TXT[lang].ui[k] !== undefined) { nodes[i].textContent = TXT[lang].ui[k]; }
+  }
+  labels.forEach(function (L) { L.el.querySelector('span').textContent = TXT[lang].lab[L.key]; });
+  var lb = document.querySelectorAll('[data-lang]');
+  for (var j = 0; j < lb.length; j++) { lb[j].classList.toggle('on', lb[j].getAttribute('data-lang') === lang); }
+  refreshButtons(); refreshStatus();
+  renderInfo();
+}
+var lbs = document.querySelectorAll('[data-lang]');
+for (var li = 0; li < lbs.length; li++) {
+  lbs[li].addEventListener('click', function (e) { lang = e.target.getAttribute('data-lang'); applyLang(); });
+}
+
+/* ========================= LABEL PROJECTION ========================= */
+var tmpV = new THREE.Vector3();
+function updateLabels() {
+  var w = window.innerWidth, h = window.innerHeight;
+  labels.forEach(function (L) {
+    var show = S.labels && (L.grp === 'end' || (G[L.grp].visible && fade[L.grp] > 0.3));
+    if (L.key === 'lLignin') { show = show && fade.lignin > 0.3; }
+    if (show) {
+      tmpV.copy(L.anchor).project(camera);
+      if (tmpV.z > 1 || tmpV.z < -1) { show = false; }
+    }
+    if (!show) { L.el.style.display = 'none'; return; }
+    var x = (tmpV.x * 0.5 + 0.5) * w, y = (-tmpV.y * 0.5 + 0.5) * h;
+    L.el.style.display = 'block';
+    L.el.style.transform = 'translate(' + Math.round(x + 8) + 'px,' + Math.round(y - 10) + 'px)';
+  });
+}
+
+/* ========================= MAIN LOOP ========================= */
+var clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  var dt = Math.min(clock.getDelta(), 0.05);
+  var sdt = dt * S.speed;
+  if (!S.paused) { T += sdt; simulate(sdt); }
+  updateStatic(dt);
+  stepFade(dt);
+  if (tween) {
+    tween.t = Math.min(1, tween.t + dt / 1.1);
+    var e = sm(tween.t);
+    camera.position.lerpVectors(tween.p0, tween.p1, e);
+    controls.target.lerpVectors(tween.t0, tween.t1, e);
+    if (tween.t >= 1) { tween = null; }
+  }
+  controls.update();
+  updateLabels();
+  renderer.render(scene, camera);
+}
+
+applyLang();
+canvas.style.cursor = 'grab';
+animate();
+}
+
+</script>
+<script>
+/* Loads three.js: first from files sitting next to this page (works offline),
+   otherwise from a CDN (needs internet). */
+(function () {
+  var V = '0.147.0';
+  var LIBS = [
+    ['three.min.js',
+     'https://cdn.jsdelivr.net/npm/three@' + V + '/build/three.min.js',
+     'https://unpkg.com/three@' + V + '/build/three.min.js'],
+    ['OrbitControls.js',
+     'https://cdn.jsdelivr.net/npm/three@' + V + '/examples/js/controls/OrbitControls.js',
+     'https://unpkg.com/three@' + V + '/examples/js/controls/OrbitControls.js']
+  ];
+  var err = document.getElementById('err');
+  function bad(msg) { err.className = 'bad'; err.style.display = 'block'; err.textContent = msg; }
+  window.addEventListener('error', function (e) {
+    if (e.message && e.message.indexOf('Script error') !== 0) { bad('Error: ' + e.message); }
+  });
+  function loadOne(urls, i, ok, fail) {
+    if (i >= urls.length) { fail(); return; }
+    var s = document.createElement('script');
+    s.src = urls[i];
+    s.onload = ok;
+    s.onerror = function () { if (s.parentNode) { s.parentNode.removeChild(s); } loadOne(urls, i + 1, ok, fail); };
+    document.head.appendChild(s);
+  }
+  function step(k) {
+    if (k >= LIBS.length) {
+      try { startVB(); err.style.display = 'none'; } catch (e) { bad('Error: ' + e.message); }
+      return;
+    }
+    loadOne(LIBS[k], 0, function () { step(k + 1); }, function () {
+      bad('Could not load ' + LIBS[k][0] + '. Connect to the internet, or put three.min.js and OrbitControls.js ' +
+          '(three.js r147) in the same folder as this file.');
+    });
+  }
+  step(0);
+})();
+</script>
+</body>
+</html>
