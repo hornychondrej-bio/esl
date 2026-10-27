@@ -5,5 +5,5 @@ decks/used_to_types.md | Used to, be used to, get used to
 decks/passive.md | Passive Voice
 decks/future_perfect.md | Future Perfect
 decks/shopping_list.md | Shopping List
-decks/conditional_complete | Complete Conditional Sentences
+decks/conditional_complete.md | Complete Conditional Sentences
 
